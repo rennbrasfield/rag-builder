@@ -1,11 +1,11 @@
 <!-- ============================================================
 DOCUMENT METADATA (PROTECTED — do not alter without express user permission)
 ============================================================ -->
-**Title:** `Rules | RAG Builder Operating Charter | v1`
+**Title:** `Rules | RAG Builder Operating Charter | v1.0.0`
 **Type:** Rules
 **Category:** RAG Builder Operating Charter
 **Variant:** null (no variant — single-instance document)
-**Version ID:** v1
+**Version ID:** v1.0.0
 **Protected nodes in this document:** the metadata header above (title, type, category, variant, version), and this document's version number. See §12.
 
 ---

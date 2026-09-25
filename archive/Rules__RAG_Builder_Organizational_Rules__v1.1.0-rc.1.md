@@ -1,11 +1,11 @@
 <!-- ============================================================
 DOCUMENT METADATA (PROTECTED — do not alter without express user permission)
 ============================================================ -->
-**Title:** `Rules | RAG Builder Organizational Rules | v1`
+**Title:** `Rules | RAG Builder Organizational Rules | v1.1.0-rc.1`
 **Type:** Rules
 **Category:** RAG Builder Organizational Rules
 **Variant:** null (no variant — single-instance document)
-**Version ID:** v1
+**Version ID:** v1.1.0-rc.1
 **Protected nodes in this document:** the metadata header above, this document's version number, and the Protected Nodes list defined in §3 (which is itself the authoritative list).
 
 ---
@@ -59,11 +59,11 @@ Example: title `Source | Keyword Retrieval | BM25 | BM25.2` → filename `Source
 *(Operating Charter §9 and the Command Reference point here.)*
 
 - **Every version carries a permanent metadata version number** reflecting its position in the queue. The first save is version **1** (`v1`, or the variant's `.1`).
-- **New versions are numbered `max + 1`.** When a genuinely new version is created (only via `Update … Source` / `Update … Custom`), the system **scans the entire queue for that document's highest existing version number and assigns highest + 1** — **never** active-version + 1. This prevents collisions when a new version is created while an older version is the active one (e.g., active is `.2`, but `.3` and `.4` exist in the archive → the new version is `.5`, not `.3`).
+- **New versions are numbered `max + 1`.** When a genuinely new version is created (only via `Update … Source` / `Update … Custom` / `Revise`), the system **scans the entire queue for that document's highest existing version number and assigns highest + 1** — **never** active-version + 1. This prevents collisions when a new version is created while an older version is the active one (e.g., active is `.2`, but `.3` and `.4` exist in the archive → the new version is `.5`, not `.3`).
 - **Version numbers are permanent and never reassigned.** A version *is* its number, for life. (Protected — §3.)
 - **Active pointer vs. version identity are separate.** "Which version is active" is a movable label; "which number a version is" is fixed identity. Version `.5` being newest while version `.2` is active is normal and non-contradictory. Version numbers are therefore monotonic and gap-free *in creation order*, while the active version can be any of them.
 - **The archive is immutable.** Every version ever created remains reachable by name forever. **Nothing is destroyed except by the user's explicit deletion command, or the user's approval of a recommended deletion.** Mistaken updates may persist in the archive; the system never prunes or "tidies" versions on its own.
-- **Navigation vs. creation.** `Rollback`/`Update` (and their `Full` forms) move the *active pointer* along existing versions and create nothing. Only `Update … Source` / `Update … Custom` create new versions (Command Reference §9–§11).
+- **Navigation vs. creation.** `Rollback`/`Update` (and their `Full` forms) move the *active pointer* along existing versions and create nothing. Only `Update … Source` / `Update … Custom` / `Revise` create new versions (Command Reference §9–§11, §15).
 
 ---
 
@@ -119,10 +119,10 @@ rag-builder/
 - **Folder naming intentionally differs from document filenames.** Folders use lowercase-hyphen; **document filenames** use the `Type__Category__Variant__Version` transform (§1) with meaningful capitals and underscores. **Do not conform one convention to the other** — a document filename is not "fixed" by lowercasing it to match a folder, and a folder is not renamed to match a filename.
 
 **Filing rules:**
-- The three **governance documents** (`Rules` Operating Charter, `Commands` Command Reference, `Rules` Organizational Rules) all live together in **`governance/`** — they are read and managed as a set.
+- The three **governance documents** (`Rules` Operating Charter, `Commands` Command Reference, `Rules` Organizational Rules) all live together in **`governance/`** — they are read and managed as a set. Only their **active** versions live there; superseded versions move to `archive/` like any other document.
 - Every other document is filed by its **Type/class**: a `Source` document goes into its **slot subfolder** under `source-truth/` (slot = its Category); a `Custom` document goes into `custom-design/`.
 - **Filenames use the filesystem-safe transform** (§1).
-- **Versioned archiving on a new version:** when `Update … Source`/`Update … Custom` creates a new version (`max + 1`, §2), Claude Code saves the new version as the active file in the slot/class folder and **moves the prior active version into `archive/`, preserving its version-ID filename.** Nothing is overwritten; the archive copy remains reachable by name for rollback (Command Reference §3–§8).
+- **Versioned archiving on a new version:** when `Update … Source`/`Update … Custom`/`Revise` creates a new version (`max + 1`, §2), Claude Code saves the new version as the active file in the slot/class folder and **moves the prior active version into `archive/`, preserving its version-ID filename.** Nothing is overwritten; the archive copy remains reachable by name for rollback (Command Reference §3–§8).
 - **Slot folders are created as slots are defined** (adding a slot is user-gated — Operating Charter §7).
 - **Protected nodes (§3) are never touched** by Claude Code without express permission — including never renaming a title or deleting a version without the user's explicit say-so.
 
@@ -165,4 +165,4 @@ For reducing the manual filing step beyond in-session Claude Code management:
 
 ## This document's own governance
 
-This Organizational Rules document is a `Rules`-type document, **versioned under the Versioning Model it defines** (§2): permanent version number, immutable archive of prior versions, changed only through gated update/rollback commands with user approval. Its metadata header, version number, and the Protected Nodes list (§3) are protected nodes.
+This Organizational Rules document is a `Rules`-type document, **versioned under the Versioning Model it defines** (§2): permanent version number, immutable archive of prior versions, changed only through gated `Revise` / update / rollback commands with user approval. Its metadata header, version number, and the Protected Nodes list (§3) are protected nodes.

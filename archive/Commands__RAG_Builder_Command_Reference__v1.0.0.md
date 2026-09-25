@@ -1,11 +1,11 @@
 <!-- ============================================================
 DOCUMENT METADATA (PROTECTED — do not alter without express user permission)
 ============================================================ -->
-**Title:** `Commands | RAG Builder Command Reference | v1`
+**Title:** `Commands | RAG Builder Command Reference | v1.0.0`
 **Type:** Commands
 **Category:** RAG Builder Command Reference
 **Variant:** null (no variant — single-instance document)
-**Version ID:** v1
+**Version ID:** v1.0.0
 **Protected nodes in this document:** the metadata header above (title, type, category, variant, version), and this document's version number. Full protected-node list: see the Organizational Rules Document.
 
 ---
