@@ -1,0 +1,25 @@
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+secrets*.*
+*_secret*
+*.token
+
+# Claude Code local-only settings (per-machine, may hold permissions/paths)
+.claude/settings.local.json
+
+# macOS system files
+.DS_Store
+._*
+
+# Editor / OS clutter
+.vscode/
+.idea/
+*.swp
+Thumbs.db
