@@ -23,3 +23,17 @@ secrets*.*
 .idea/
 *.swp
 Thumbs.db
+
+# Build data (Organizational Rules §8) — builds live outside this repo.
+# Safety net in case a build folder is ever created here by mistake.
+inputs/
+correspondence/
+build.yaml
+evidence.yaml
+answers.yaml
+contacts.yaml
+signoff-packet-v*
+decisions/signoff-*
+# The empty build-workspace skeleton is part of the tool.
+!templates/build-workspace/
+!templates/build-workspace/**

@@ -16,9 +16,33 @@ systems, operated with an AI assistant (Claude Code) under strict human approval
 | Path | Contents |
 |---|---|
 | `governance/` | The active versions of the three governance documents |
+| `custom-design/` | My own designs, including `.yaml` data documents (e.g., the Variable Catalog) |
+| `tools/` | Small scripts (quote checker, report generator) |
+| `templates/` | The empty build-workspace skeleton copied by `New Build` |
+| `.githooks/` | Git hooks that block build data from being committed |
 | `archive/` | Every superseded version, kept for history and rollback |
 | `CHANGELOG.md` | What changed in each release |
 | `CLAUDE.md` | Operating instructions loaded by Claude Code at session start |
+
+## Setup
+After cloning, turn on the commit guard once:
+```
+git config core.hooksPath .githooks
+```
+
+## Build workflow
+This repository is the **tool**. Each company engagement is a **build**, which holds that
+company's confidential data and lives in a private workspace **outside this repo**
+(`~/Documents/rag-builds/<name>/`, never with a git remote). Build chats are opened from the
+build's folder.
+
+`New Build` → `Ingest` → `Gap Report` → `Draft Emails` → `Log Response` → `Signoff Packet` →
+`Record Signoff` → `Close Build`
+
+Every answer cites a verbatim quote from a document or a named person. The result is a
+plain-language sign-off packet a non-technical manager can verify. See Command Reference §18–§26.
+
+**Builds hold confidential company data and never live in this repo.**
 
 ## The governance documents
 - **Operating Charter** — how the assistant behaves: processing modes, document classes, selection, conflict handling.
@@ -33,6 +57,7 @@ systems, operated with an AI assistant (Claude Code) under strict human approval
 | `Update 'X' Source` / `Custom` | Web-search for newer sources or better architectures; approve what to integrate |
 | `Rollback` / `Update` (by steps, to a version, or `Full`) | Move a document's active version along its history |
 | `List` / `Get 'X'` | Read-only overview, or one document's full version history |
+| `New Build` … `Close Build` | Build intake: gather, cite and sign off a company's architecture variables |
 
 See the Command Reference for exact rules.
 

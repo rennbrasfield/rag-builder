@@ -1,0 +1,19 @@
+#!/bin/sh
+# RAG Builder commit guard (Organizational Rules §8).
+# Blocks commits containing build data. Build workspaces live outside this repo.
+# The empty skeleton in templates/build-workspace/ is exempt.
+
+pattern='(^|/)inputs/|(^|/)correspondence/|(^|/)build\.yaml$|(^|/)evidence\.yaml$|(^|/)answers\.yaml$|(^|/)contacts\.yaml$|signoff-packet-v[0-9]|(^|/)decisions/signoff-'
+
+matches=$(git diff --cached --name-only --diff-filter=ACMR \
+  | grep -Ev '^templates/build-workspace/' \
+  | grep -E "$pattern")
+
+if [ -n "$matches" ]; then
+  echo "BLOCKED: these staged files look like build data (Organizational Rules §8):" >&2
+  echo "$matches" | sed 's/^/  - /' >&2
+  echo "Build data belongs in ~/Documents/rag-builds/<build>/, never in this repo." >&2
+  echo "Unstage them with: git restore --staged <file>" >&2
+  exit 1
+fi
+exit 0

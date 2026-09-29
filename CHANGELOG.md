@@ -5,6 +5,28 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versio
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html), adapted for documents — see
 *Organizational Rules §2*. Each document is versioned independently; a release may cover several.
 
+## 2026-09-29 — Build intake update
+
+### Organizational Rules → v1.2.0
+- **Added** §8 Build Workspaces: private location, layout, evidence rules, enforcement layers, close-out.
+- **Added** YAML data documents (§1); `tools/`, `templates/`, `.githooks/` folders (§5).
+- **Added** guardrail triggers 5–7 (§6); protected nodes 5–6: sign-off packets and evidence quotes (§3).
+- **Changed** version IDs and titles protect existing versions; a clean new version needs no separate approval (§2, §3).
+
+### Operating Charter → v1.2.0
+- **Added** the Gather job (§1), Mode 3 Build Intake (§4), and build records outside the knowledge base (§3).
+- **Added** build dependency flags (§10) and build gates (§13).
+- **Changed** §8 selection now uses the build's confirmed answers; §12 aligned with the new version-ID scope.
+
+### Command Reference → v1.2.0
+- **Added** build intake commands §18–§26 and their Quick Reference table.
+- **Added** knowledge-base-vs-build and missing-tool-piece rules (§2).
+- **Changed** §15 step 4 to match the new version-ID scope.
+
+### Repository
+- **Added** `.githooks/pre-commit` build-data guard, `.gitignore` build patterns, and README build-workflow and setup sections.
+- **Changed** `CLAUDE.md`: build-data rule, build workspace location, protected-node scope, three modes.
+
 ## 2026-09-25 — Commands tool expansion update
 
 ### Command Reference → v1.1.0
