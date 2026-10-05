@@ -1,9 +1,20 @@
 # Changelog
 
-All released versions of the RAG Builder governance documents are recorded here, newest first.
+All released versions of the RAG Builder's documents (governance and knowledge base) are recorded here, newest first.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Version IDs follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html), adapted for documents — see
 *Organizational Rules §2*. Each document is versioned independently; a release may cover several.
+
+## 2026-10-05 — Variable Catalog v1.0.0
+
+### RAG Variable Catalog → v1.0.0 (new, `custom-design/`)
+- **Added** the first Custom document: 81 variables in 9 groups (O, A, B, I, C, D, E, F, G) that must be answered before a RAG architecture is chosen.
+- Each variable carries a technical question, a plain-language question for emails, a plain-language explanation and "why it matters" for the sign-off glossary, where to find the answer, typical authority and informant roles, what counts as a sufficient answer, a default, a 0–10 analysis-depth level, and a one-way (hard-to-undo) flag.
+- Group O (organization & governance) comes first; O4 defines the dispute escalation path and its named exceptions.
+
+### Repository
+- **Changed** `CHANGELOG.md` header to cover all documents, not only governance.
+- **Added** a "Knowledge base contents" section to `README.md`.
 
 ## 2026-09-29 — Build intake update
 

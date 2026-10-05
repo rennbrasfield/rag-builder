@@ -24,6 +24,11 @@ systems, operated with an AI assistant (Claude Code) under strict human approval
 | `CHANGELOG.md` | What changed in each release |
 | `CLAUDE.md` | Operating instructions loaded by Claude Code at session start |
 
+## Knowledge base contents
+| Document | What it is |
+|---|---|
+| `custom-design/Custom__RAG_Variable_Catalog__v1.0.0.yaml` | 81 variables that must be answered before a RAG architecture is chosen, with plain-language questions, where to find answers, who can confirm them, defaults, analysis depth and hard-to-undo flags. The Build commands run on it. |
+
 ## Setup
 After cloning, turn on the commit guard once:
 ```

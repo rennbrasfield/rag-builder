@@ -1,0 +1,2205 @@
+# ============================================================
+# DOCUMENT METADATA (PROTECTED — do not alter without express user permission)
+# ============================================================
+metadata:
+  title: "Custom | RAG Variable Catalog | v1.0.0"
+  type: Custom
+  category: RAG Variable Catalog
+  variant: null
+  version: v1.0.0
+  version_note: Initial variable catalog
+
+# ------------------------------------------------------------
+# PURPOSE
+# Every variable that must be known and answered before a RAG architecture can be chosen.
+# Used by the Build Intake commands (Command Reference §18–§26): Ingest fills answers with
+# quoted evidence, Gap Report lists what's missing with where to look and whom to ask,
+# Draft Emails uses the plain-language questions, Log Response checks answers against
+# sufficient_answer and authority, and the sign-off packet's glossary comes from
+# plain_explanation and why_it_matters.
+#
+# Defaults, analysis levels, one-way flags and typical roles are REFERENCE POINTS.
+# Each build may adjust them for its company, recording the change and the reason.
+# Groups are ordered so that O (who can answer what) is settled first.
+# ------------------------------------------------------------
+#
+# FIELD GUIDE (every variable)
+#   id, name            Stable ID (permanent once released; never reused) and short name
+#   analysis            0–10: the minimum depth of work needed to answer this variable reliably.
+#                       Sets the procedure floor; the full procedure per level is defined in Phase 3.
+#                         0    Copy: one known source of truth; copy the value; no interpretation.
+#                         1–2  Lookup: one or two sources; light interpretation; one confirmation.
+#                         3–4  Confirm: a few sources or informants; minor synthesis; authority confirms.
+#                         5–6  Synthesize: several documents and informants; reconcile differences;
+#                              answers may differ per department or document set.
+#                         7–8  Investigate: several departments; conflicting inputs likely; cross-verified
+#                              by multiple confirmations; external research if needed; one audit pass for gaps.
+#                         9–10 Deep audit: internal and external research; many informants; verified across
+#                              departments; multiple independent audit passes for holes; high stakes, must be
+#                              right. A 10 also produces a structured model (e.g., an org map), not a single value.
+#                       Analysis depth is not the same as stakes: a critical variable can be a simple lookup.
+#                       These levels are DEFAULT reference points for likely depth, not absolute ratings.
+#                       Each build may raise or lower a level for its company; record the change and the reason.
+#   one_way             true = feeds a decision that is expensive to undo (re-embed, re-ingest, migrate)
+#   question            Technical question, for the builder
+#   plain_question      The question as it appears in emails to non-technical people
+#   plain_explanation   Glossary paragraph: what this is, in everyday terms
+#   why_it_matters      Glossary paragraph: what goes wrong if it's wrong
+#   answer_form         Allowed answers (type + options)
+#   where_to_find       Documents or places that usually hold the answer
+#   typical_authority   Roles that USUALLY hold authority to confirm this variable (answer becomes Sufficient)
+#                       and to approve design choices resting on it. A starting point only: each build assigns
+#                       the actual authority per variable (and per department/document set) to real people.
+#   typical_informants  Roles USUALLY worth asking first for facts. Not exclusive: in a given build any role or
+#                       person can be an informant, an authority, or both.
+#   sufficient_answer   What an answer must contain to count as Sufficient
+#   default             Proposed value if unknown (system-proposed = Assumed until you accept); null = must be answered
+#   drives              Architecture decisions this variable affects
+#   conflicts_with      Variables to cross-check against it (optional)
+#
+# Optional fields:
+#   default_note        Why the default was chosen, or why there is none
+#   related             Variables that inform or depend on this one
+#   feeds               Variables whose answers this one supplies or derives
+#   source              External source behind the variable or its default (unverified ones say so)
+#   sensitivity         Handling note when the answer itself contains personal or confidential data
+#   escalation_exceptions  (O4) Named exceptions: trigger, what escalation means, what is not allowed
+#   note                Definition or convention needed to answer consistently
+#
+# ROLES used in typical_authority / typical_informants (defined fully in the Role Map):
+#   sponsor, product_owner, end_users, department_leads, content_owners, people_ops,
+#   it_infra, data_eng, security, legal_privacy, compliance, finance, support_ops
+
+groups:
+  - id: O
+    name: Organization & governance
+    description: Who the company is, and who confirms and approves what. Answered first.
+  - id: A
+    name: Purpose, stakes & use
+    description: What the system is for and how much errors cost.
+  - id: B
+    name: Corpus
+    description: The documents the system will search.
+  - id: I
+    name: Sources & ingestion
+    description: Where the content lives and how it gets into the system.
+  - id: C
+    name: Queries
+    description: Who asks, what they ask, and how often.
+  - id: D
+    name: Performance & cost
+    description: Speed, money and uptime.
+  - id: E
+    name: Security & compliance
+    description: What must be protected, where data may go, and what the law requires.
+  - id: F
+    name: Environment & team
+    description: What already exists, what the team can run, and how long the system must last.
+  - id: G
+    name: Evaluation & oversight
+    description: How we will know the system works, and who keeps checking it.
+
+variables:
+
+  # ==================== GROUP O — ORGANIZATION & GOVERNANCE ====================
+
+  - id: O1
+    name: Company structure
+    analysis: 10
+    one_way: true
+    question: >
+      What is the company's actual structure: total size, departments, headcount per
+      department, department leads, and reporting lines as they really work (including
+      informal decision-makers)?
+    plain_question: >
+      Could you share the current org chart, or describe the departments, roughly how
+      many people are in each, who leads each one, and who reports to whom? If decisions
+      in practice go through someone other than the chart suggests, please mention that too.
+    plain_explanation: >
+      A map of how the company is organized: which departments exist, how big they are,
+      who leads them, and how decisions really flow, which is not always the same as the
+      official chart.
+    why_it_matters: >
+      This map decides who must be asked and who must approve each part of the design.
+      It also shapes the system itself: which groups of people may see which documents,
+      how many people will use it, and how different departments' needs and risks differ.
+      Getting it wrong means the wrong people approve decisions, and the right people find
+      out too late.
+    answer_form:
+      type: structured model (org map)
+      contents: [total headcount, departments, headcount per department, department leads, reporting lines, informal decision-makers, planned changes]
+    where_to_find: [org chart, HR system or employee directory, team or department pages, onboarding documents, interviews with people operations and department leads]
+    typical_authority: [people_ops, sponsor]
+    typical_informants: [department_leads, product_owner]
+    sufficient_answer: >
+      An org map covering every department the system will touch (headcount, lead, reporting
+      line), confirmed by people operations or the sponsor. Informal decision-makers and planned
+      reorganizations noted, or explicitly confirmed as none.
+    default: null
+    default_note: No default. Must be built and confirmed; it determines who can confirm everything else.
+    drives: [authority assignment per variable, approval and notification routing, access groups (E3, E4), user volume (C7), per-department stakes (A7), support capacity (F4, G4)]
+    feeds: [A7, C7, E3, E4, F4, G4]
+    sensitivity: Contains personal data (names, reporting lines). Build workspace only.
+
+  - id: O2
+    name: How design decisions are approved today
+    analysis: 4
+    one_way: false
+    question: How are technology or AI design decisions approved today? (single AI/IT authority · per-department approval · informal/ad hoc · no process)
+    plain_question: >
+      When a new system or tool is introduced, who signs off on how it's designed? One
+      person or team, each affected department, or is there no set process?
+    plain_explanation: >
+      How the company currently decides whether a new system's design is acceptable,
+      and who has a say.
+    why_it_matters: >
+      If only one team approves designs, the departments that live with the system may
+      not be heard until problems appear. Knowing the current process shows whether this
+      build can use it as-is, or whether a per-department approval step should be proposed.
+    answer_form:
+      type: single choice + description
+      options: [single AI/IT authority, per-department approval, informal/ad hoc, no process]
+    where_to_find: [IT or technology governance policy, change-management procedures, past project approvals, interviews with the sponsor and department leads]
+    typical_authority: [sponsor]
+    typical_informants: [it_infra, department_leads, product_owner]
+    sufficient_answer: One option with a recent example of a decision approved that way, confirmed by the sponsor.
+    default: no process
+    default_note: Conservative. Assumes a per-department approval step will need to be proposed.
+    drives: [approval routing, whether to propose per-department design approval]
+
+  - id: O3
+    name: AI team structure
+    analysis: 3
+    one_way: false
+    question: How is AI work organized? (no AI team · central AI team · central team with a named AI owner per department · AI staff embedded in departments)
+    plain_question: >
+      Is there a team responsible for AI work? If so, is it one central team, or does
+      each department have its own person responsible for AI?
+    plain_explanation: >
+      Who inside the company is responsible for AI systems, and whether that
+      responsibility sits in one team or is spread across departments.
+    why_it_matters: >
+      In larger companies, having someone responsible for AI in each department makes
+      approvals and ongoing support much smoother. Smaller companies usually rely on one
+      person or team. The design, and who will run it after launch, must fit what exists.
+    answer_form:
+      type: single choice
+      options: [no AI team, central AI team, central team + per-department AI owners, embedded per department]
+    where_to_find: [org chart, AI or data strategy documents, job descriptions, interviews with the sponsor]
+    typical_authority: [sponsor]
+    typical_informants: [people_ops, it_infra, department_leads]
+    sufficient_answer: One option, with the names of the people responsible where they exist, confirmed by the sponsor.
+    default: central AI team
+    drives: [approval routing, operations capacity (F4), who supports the system after launch]
+    related: [O1, F4]
+
+  - id: O4
+    name: Escalation path
+    analysis: 2
+    one_way: false
+    question: Who is the sponsor (final decision-maker on disputes), and who facilitates dispute-resolution meetings between departments?
+    plain_question: >
+      If two departments disagree about a design decision, who runs the meeting to try to
+      resolve it, and who has the final say if they can't agree?
+    plain_explanation: >
+      The agreed route for settling disagreements: first a meeting between the departments
+      involved, led by a named facilitator, and only if that fails, a decision by the
+      project's sponsor.
+    why_it_matters: >
+      Departments will sometimes want opposite things; for example, the most thorough
+      search versus the lowest cost. Agreeing up front who facilitates and who decides
+      prevents stalled projects and decisions made by whoever pushes hardest.
+    answer_form:
+      type: named people/roles
+      contents: [sponsor, meeting facilitator, conditions for going straight to the sponsor]
+    where_to_find: [project charter, governance or RACI documents, interviews with the sponsor]
+    typical_authority: [sponsor]
+    typical_informants: [product_owner]
+    sufficient_answer: A named sponsor and facilitator, confirmed by the sponsor.
+    default: sponsor = executive funding the project; facilitator = senior manager of the AI/implementation team
+    default_note: >
+      Standard rule (to be written into governance in Phase 3): a dispute goes to a resolution
+      meeting of the departments involved, run by the facilitator. The sponsor is notified when the
+      dispute opens and decides only if the meeting fails, except in the named cases below. In every
+      case the decision is recorded with each department's position, including any dissent.
+    escalation_exceptions:
+      - case: Budget overrun
+        trigger: >
+          Any option in dispute, or the option the departments converge on, would exceed the
+          approved project budget or cost ceiling (D2–D4).
+        escalation_means: >
+          The sponsor decides directly, choosing one of: (a) approve additional budget;
+          (b) accept a lower-cost option and the risk that comes with it, with the affected
+          department's objection recorded; or (c) change the project's scope.
+        not_allowed: >
+          The team quietly picking the cheaper option to stay within budget, or the meeting
+          reallocating money it doesn't control.
+      - case: Critical stakes
+        trigger: The dispute concerns a variable or design choice rated critical (A2 or A3) in any department or document set.
+        escalation_means: >
+          The sponsor joins the resolution meeting from the start and makes the final call.
+          Until the decision is made, the more protective option is the working assumption.
+        not_allowed: >
+          Proceeding on the less protective option while the decision is pending, or settling it
+          by majority vote among departments.
+      - case: Deadline risk
+        trigger: Waiting for a resolution meeting would push a required approval past a committed deadline.
+        escalation_means: >
+          The sponsor decides whether to move the deadline or decide the dispute immediately.
+          Meanwhile, work may continue only on choices that are easy to reverse.
+        not_allowed: >
+          Building any hard-to-undo (one-way) component before the dispute is settled.
+    drives: [dispute handling, decision records]
+
+  - id: O5
+    name: Approval and objection timing
+    analysis: 2
+    one_way: false
+    question: >
+      For notify-and-object items, how long is the objection window? For items needing full
+      approval, what turnaround is reasonable per department?
+    plain_question: >
+      When we tell your department about a low-risk design decision, how many working days
+      do you need to raise an objection? For important decisions that need your approval,
+      how quickly can you usually respond?
+    plain_explanation: >
+      How much time each department gets to object to low-risk decisions, and how long
+      approvals of important decisions normally take.
+    why_it_matters: >
+      Low-risk decisions shouldn't wait on everyone's approval, but departments still need
+      a fair chance to object. Agreed timings keep the project moving without anyone being
+      bypassed.
+    answer_form:
+      type: duration per department
+      contents: [objection window (working days), approval turnaround (working days)]
+    where_to_find: [existing change-management or review policies, interviews with department leads]
+    typical_authority: [sponsor, department_leads]
+    typical_informants: [product_owner]
+    sufficient_answer: A window and turnaround per department (or one company-wide value), agreed by the sponsor or each department lead.
+    default: 5 working days objection window; 10 working days approval turnaround
+    drives: [notify-and-object process, build timeline]
+
+  # ==================== GROUP A — PURPOSE, STAKES & USE ====================
+
+  - id: A1
+    name: Task type
+    analysis: 4
+    one_way: true
+    question: What job must the system do? (Q&A, search, summarizing across documents, drafting with sources, adapting style, a tool used by another AI agent)
+    plain_question: What will people use this system for? Please describe two or three real examples of what someone would ask it or ask it to do.
+    plain_explanation: >
+      The main job the system is being built to do. Answering a specific question,
+      finding the right documents, summarizing a large body of material and writing
+      new text in a particular style are different jobs, and each works best with a
+      different design.
+    why_it_matters: >
+      This shapes the whole design. A system built for quick question-answering will
+      do poorly if it is later expected to summarize hundreds of documents or write in
+      the company's voice, and changing that later often means rebuilding.
+    answer_form:
+      type: multi-select with share
+      options: [question-answering, search/discovery, summarizing across documents, drafting with sources, style/tone adaptation, tool for an AI agent]
+    where_to_find: [project brief or business case, product requirements, the request that started this project, interviews with intended users]
+    typical_authority: [sponsor, product_owner]
+    typical_informants: [end_users]
+    sufficient_answer: At least one job named, with two or more real example requests, from the sponsor or product owner.
+    default: null
+    drives: [overall architecture, generation, whether RAG alone is enough or fine-tuning is needed, evaluation]
+
+  - id: A2
+    name: Cost of a missed document
+    analysis: 7
+    one_way: true
+    question: Per stakes tier, what is the consequence if a relevant document exists but isn't retrieved?
+    plain_question: If the system fails to find a document that it should have found, what is the worst realistic consequence? Does this differ between types of users or questions?
+    plain_explanation: >
+      How much harm is done when the system overlooks information that was actually
+      there. For casual questions, a near-miss is an inconvenience. In legal, medical or
+      safety work, a missed document can mean a wrong decision with real consequences.
+    why_it_matters: >
+      The more a miss costs, the more thoroughly the system must search: it looks
+      further, uses several search methods at once and checks its own coverage. That
+      thoroughness costs time and money, so it should match the real stakes.
+    answer_form:
+      type: level per tier, or per department / document set
+      options: [low, moderate, high, critical]
+    where_to_find: [risk register, compliance or legal policies, incident reports, business case, interviews with the people who act on the answers]
+    typical_authority: [sponsor, department_leads, compliance, legal_privacy]
+    typical_informants: [end_users, content_owners]
+    sufficient_answer: A level for each user group or question type (or confirmation that it's the same for all), with at least one example consequence, from someone accountable for outcomes.
+    default: high
+    drives: [how many results to retrieve, exact vs. approximate search, keyword + meaning search, reranking, recall checks]
+    conflicts_with: [D1]
+
+  - id: A3
+    name: Cost of a wrong answer
+    analysis: 7
+    one_way: false
+    question: Per stakes tier, what is the consequence of a wrong or unsupported answer? If sources themselves can be wrong, which matters more — faithfulness to the source or correctness?
+    plain_question: If the system gives a confident but wrong answer, what is the worst realistic consequence? And if a company document is itself out of date or wrong, should the system repeat what the document says, or flag it?
+    plain_explanation: >
+      How much harm a wrong answer causes. It also asks a subtle follow-up: when the
+      company's own documents contain errors, should the system faithfully report what
+      they say, or try to catch the error?
+    why_it_matters: >
+      High-stakes answers need extra checks: confirming every statement is backed by a
+      source, admitting uncertainty, or routing to a person. These checks add cost and
+      delay, so they should be switched on where they're actually needed.
+    answer_form:
+      type: level per tier or per department / document set, plus a choice
+      options: [low, moderate, high, critical]
+      choice: [faithful to the source, correct even if sources are wrong]
+    where_to_find: [risk register, compliance policies, quality or audit requirements, past incidents caused by bad information]
+    typical_authority: [sponsor, department_leads, compliance, legal_privacy]
+    typical_informants: [end_users, content_owners]
+    sufficient_answer: A level per tier with an example consequence, plus the faithful-vs-correct choice, from someone accountable for outcomes.
+    default: high (faithful to the source)
+    drives: [groundedness checks, abstention, human review, checking against systems of record]
+
+  - id: A4
+    name: Citations and audit trail
+    analysis: 3
+    one_way: true
+    question: Must answers show their sources, and at what precision? (none · document · exact passage · full audit trail)
+    plain_question: Do people need to see where each answer came from? Is naming the document enough, or must they see the exact passage? Does anyone need a permanent record of what was asked and answered?
+    plain_explanation: >
+      Whether the system shows its work. It can give answers with no sources, name the
+      document an answer came from, point to the exact sentence, or keep a full record
+      of every question, answer and source for later review.
+    why_it_matters: >
+      Precise citations have to be planned when documents are first loaded into the
+      system; adding them afterwards means reloading everything. A full audit trail also
+      has to be reconciled with any rules that restrict what may be logged.
+    answer_form:
+      type: single choice
+      options: [none, document-level, exact passage, full audit trail]
+    where_to_find: [compliance or audit requirements, regulatory obligations, records-management policy, user expectations]
+    typical_authority: [compliance, legal_privacy]
+    typical_informants: [product_owner, end_users]
+    sufficient_answer: One level, with the reason (e.g., a regulation or user need), from compliance or the product owner.
+    default: exact passage
+    drives: [chunk metadata captured at ingest, context assembly, logging design]
+    conflicts_with: [E6, G5]
+
+  - id: A5
+    name: Allowed to say "I don't know"
+    analysis: 2
+    one_way: false
+    question: May the system abstain ("not found / I don't know") instead of answering?
+    plain_question: When the system can't find a reliable answer, is it acceptable for it to say "I couldn't find that", or must it always give an answer?
+    plain_explanation: >
+      Whether the system is permitted to admit it doesn't know. Some uses prefer an
+      honest "not found"; others (for example, a customer-facing assistant) may be
+      expected to always respond with something.
+    why_it_matters: >
+      Systems that must always answer are more likely to guess. Allowing "I don't know"
+      is one of the cheapest ways to reduce wrong answers, but it has to be acceptable
+      to the people using it.
+    answer_form:
+      type: yes/no, optionally per tier
+      options: [yes, no]
+    where_to_find: [product requirements, customer-experience guidelines, interviews with users]
+    typical_authority: [product_owner, sponsor]
+    typical_informants: [end_users]
+    sufficient_answer: Yes or no (per tier if it differs), from the product owner or sponsor.
+    default: yes
+    drives: [confidence gates, abstention thresholds, fallback wording]
+
+  - id: A6
+    name: Human review
+    analysis: 3
+    one_way: false
+    question: Does a person review outputs before they are used? (never · by risk tier · always)
+    plain_question: Before an answer is acted on, does anyone check it? Always, only for important matters, or never?
+    plain_explanation: >
+      Whether a person looks over the system's answers before they're used, and in
+      which situations.
+    why_it_matters: >
+      If people review answers, the system can hand them what they need to check
+      quickly (sources, risk flags). If nobody reviews, the system itself must carry
+      more of the checking.
+    answer_form:
+      type: single choice
+      options: [never, by risk tier, always]
+    where_to_find: [current workflow descriptions, standard operating procedures, approval policies]
+    typical_authority: [product_owner, department_leads, compliance]
+    typical_informants: [end_users]
+    sufficient_answer: One option; if "by risk tier", which situations trigger review. From the process owner.
+    default: by risk tier
+    drives: [review gates, output format (sources, risk flags), escalation]
+    related: [G4]
+
+  - id: A7
+    name: Whether stakes vary
+    analysis: 6
+    one_way: false
+    question: Are stakes the same for every user and question, or do they vary by role, query type or purpose?
+    plain_question: Do some people or some questions carry much higher stakes than others? For example, a quick internal lookup versus an answer that ends up in a contract.
+    plain_explanation: >
+      Whether everyone using the system has similar stakes, or whether some uses
+      matter far more than others.
+    why_it_matters: >
+      If stakes vary, the system can offer a fast standard mode and a slower, more
+      thorough mode, instead of making everyone pay the cost of the most careful
+      checking, or leaving the important cases under-checked.
+    answer_form:
+      type: single choice + description
+      options: [same for everyone, varies by role, varies by department or document set, varies by question or purpose]
+    where_to_find: [user groups and their responsibilities, business process maps, risk register]
+    typical_authority: [sponsor, department_leads]
+    typical_informants: [product_owner, end_users]
+    sufficient_answer: One option, and if stakes vary, which roles or question types are high-stakes.
+    default: varies by question or purpose
+    drives: [stakes modes, triage, tier-specific settings]
+
+  - id: A8
+    name: Error tolerance (in numbers)
+    analysis: 6
+    one_way: false
+    question: Per tier, what are the maximum acceptable rates of critical misses and of wrong answers?
+    plain_question: Roughly how often could the system miss something important, or be wrong, before it's no longer acceptable? For example, 1 in 100 answers? 1 in 1,000?
+    plain_explanation: >
+      A concrete limit on how often the system may fail. "It should be accurate" can't
+      be measured; "no more than 1 wrong answer in 200" can.
+    why_it_matters: >
+      These numbers become the targets used to test the system and set its safety
+      thresholds. Without them there's no way to know whether the system is good enough
+      to launch.
+    answer_form:
+      type: rate per tier
+      options: [e.g., "1 in 100", "1 in 1,000"]
+    where_to_find: [quality targets, service-level agreements, audit standards, current error rates of the manual process being replaced]
+    typical_authority: [sponsor, department_leads, compliance]
+    typical_informants: [product_owner, content_owners]
+    sufficient_answer: A rate (or range) per tier for misses and for wrong answers, from someone who can accept that risk on the company's behalf.
+    default: null
+    default_note: No safe default exists. If unknown at sign-off, it must be set before evaluation begins; it does not block the architecture decision.
+    drives: [evaluation targets, risk-controlled thresholds, go-live criteria]
+    related: [A2, A3, G2]
+
+  - id: A9
+    name: Where answers go
+    analysis: 4
+    one_way: false
+    question: Where do answers end up (displayed only · pasted into reports, contracts or decks · feeding automated actions), and how long do decisions based on them stand?
+    plain_question: After someone gets an answer, what happens to it? Is it just read, copied into reports or contracts, or used to trigger actions automatically? How long do decisions based on it usually last?
+    plain_explanation: >
+      What happens to an answer after it's given. An answer that's read and forgotten
+      is very different from one pasted into a contract or used to trigger an automatic
+      action.
+    why_it_matters: >
+      Answers that travel into lasting documents or decisions need tracking: if the
+      underlying information later changes, the people who relied on it should be told.
+      Answers that trigger actions need extra safeguards.
+    answer_form:
+      type: multi-select + duration
+      options: [read on screen, copied into reports/contracts/presentations, feeds automated actions]
+    where_to_find: [workflow descriptions, examples of documents that would use the answers, interviews with users]
+    typical_authority: [product_owner, department_leads]
+    typical_informants: [end_users, content_owners]
+    sufficient_answer: One or more destinations with an example, plus a rough lifespan of the decisions involved.
+    default: copied into reports/contracts/presentations
+    drives: [answer tracking, dependency notifications, output format, action safeguards]
+    related: [A10]
+
+  - id: A10
+    name: Does the system take actions
+    analysis: 5
+    one_way: true
+    question: Will the system only answer, use read-only tools, or perform write actions (send, update, create records)?
+    plain_question: Should the system only give answers, or should it also do things, such as sending messages, updating records or creating tickets?
+    plain_explanation: >
+      Whether the system is limited to answering, or can also act on the company's
+      systems. Acting is powerful but introduces new risks, since a wrong answer can
+      become a wrong action.
+    why_it_matters: >
+      A system that takes actions needs tight permissions, limits on what it may do and
+      human approval for risky steps. Adding these after launch is harder than designing
+      them in from the start.
+    answer_form:
+      type: single choice + list of actions
+      options: [answer only, read-only tools, write actions]
+    where_to_find: [product requirements, automation roadmap, IT integration plans]
+    typical_authority: [security, product_owner]
+    typical_informants: [it_infra]
+    sufficient_answer: One option; if tools or actions are included, the list of systems and actions, confirmed by IT or security.
+    default: answer only
+    drives: [permissions, approval steps, loop and timeout limits, security review]
+    source: OWASP Top 10 for LLM Applications 2025 (LLM01 prompt injection; LLM06 excessive agency)
+
+  - id: A11
+    name: Output format
+    analysis: 2
+    one_way: false
+    question: What form must answers take? (short answer · long report · structured data such as JSON · other)
+    plain_question: What should an answer look like? A short reply, a longer written report, a filled-in form or table, or something another system can read?
+    plain_explanation: >
+      The shape of the system's output: a sentence or two, a multi-page report, or
+      structured data that another program reads.
+    why_it_matters: >
+      Long reports need more source material and a different writing step than short
+      answers. Output read by other programs must follow a strict format.
+    answer_form:
+      type: multi-select
+      options: [short answer, long report, structured data (e.g., JSON), other]
+    where_to_find: [product requirements, examples of current outputs, the systems that will consume the output]
+    typical_authority: [product_owner]
+    typical_informants: [end_users, it_infra]
+    sufficient_answer: One or more formats, ideally with an example.
+    default: short answer with citations
+    drives: [generation step, how much context is assembled, output validation]
+
+  - id: A12
+    name: Can it ask clarifying questions
+    analysis: 1
+    one_way: false
+    question: Can the system ask the user a clarifying question before answering (interactive), or must it answer in one shot (e.g., called by another program)?
+    plain_question: If a question is unclear, can the system ask the person a follow-up question, or must it always answer immediately?
+    plain_explanation: >
+      Whether the system can have a short back-and-forth to understand what the person
+      really needs, or must respond straight away. Another program calling the system
+      can't answer follow-up questions.
+    why_it_matters: >
+      Being able to ask ("Do you mean the 2023 or 2024 policy?") prevents confident
+      answers to the wrong question. If it can't ask, the system has to handle
+      ambiguity on its own, for example by covering several interpretations.
+    answer_form:
+      type: single choice
+      options: [interactive, one-shot]
+    where_to_find: [product requirements, how users will reach the system (chat, form, other software)]
+    typical_authority: [product_owner]
+    typical_informants: [end_users]
+    sufficient_answer: One option, from the product owner.
+    default: one-shot
+    drives: [query rewriting, clarification step, handling ambiguous questions]
+
+  # ==================== GROUP B — CORPUS ====================
+
+  - id: B1
+    name: Corpus size now
+    analysis: 4
+    one_way: true
+    question: How many documents, and roughly how many pages or tokens, will the system search at launch?
+    plain_question: Roughly how many documents will the system need to search when it launches, and about how long are they in total (pages, or file sizes)?
+    plain_explanation: >
+      How much material the system has to search. A few hundred pages is a very
+      different job from millions of pages.
+    why_it_matters: >
+      Size decides whether a search system is needed at all: a small enough collection
+      can simply be handed to the AI whole. It also decides which search technology fits
+      and what it costs to run. Picking technology for the wrong size is expensive to undo.
+    answer_form:
+      type: counts
+      contents: [number of documents, total pages or tokens, breakdown by source or department]
+    where_to_find: [storage reports (SharePoint, Google Drive, file shares), document-management system statistics, database row counts, content owners' estimates]
+    typical_authority: [it_infra, content_owners]
+    typical_informants: [data_eng, department_leads]
+    sufficient_answer: Document count and total size per source, from a system report or the person who manages that storage.
+    default: null
+    default_note: Must be measured or estimated by someone who manages the storage; a guess here is a one-way-door risk.
+    drives: [RAG vs. putting everything in the prompt (under ~200K tokens), index type, hosting cost]
+
+  - id: B2
+    name: Growth
+    analysis: 4
+    one_way: true
+    question: How large will the corpus be in 12–24 months?
+    plain_question: How quickly is this collection of documents growing? Roughly how large do you expect it to be in one to two years?
+    plain_explanation: >
+      How fast the collection of documents grows over time.
+    why_it_matters: >
+      A system sized only for today may need to be replaced within a year. Knowing the
+      growth rate lets the design fit the size the collection will reach, not just the
+      size it is now.
+    answer_form:
+      type: count or rate
+      contents: [expected size in 12 months, expected size in 24 months, known upcoming additions]
+    where_to_find: [storage growth history, planned migrations or acquisitions, content roadmaps]
+    typical_authority: [it_infra, content_owners]
+    typical_informants: [department_leads, data_eng]
+    sufficient_answer: An estimate for 12–24 months with its basis (history or a known plan).
+    default: 3× current size within 24 months
+    default_note: Conservative sizing assumption; replace with measured growth when available.
+    drives: [index type, scaling plan, hosting]
+
+  - id: B3
+    name: Update pattern
+    analysis: 3
+    one_way: false
+    question: How large is the initial backfill, and at what rate are documents added or changed afterwards (static · periodic batch · continuous)?
+    plain_question: After the initial collection is loaded, how often are documents added or changed? Rarely, in regular batches, or constantly?
+    plain_explanation: >
+      Whether the collection mostly stays the same, changes in batches (for example,
+      monthly), or changes all the time.
+    why_it_matters: >
+      A collection that changes constantly needs a loading process that runs all the time
+      and a search system that handles frequent updates well. A static one can be loaded once.
+    answer_form:
+      type: single choice + rate
+      options: [static, periodic batch, continuous]
+    where_to_find: [document-management activity logs, content owners, publishing schedules]
+    typical_authority: [content_owners]
+    typical_informants: [it_infra, data_eng]
+    sufficient_answer: One pattern plus an approximate rate (e.g., "about 50 new documents a week").
+    default: periodic batch (weekly)
+    drives: [ingestion pipeline, ingestion budget, index choice]
+    related: [D5]
+
+  - id: B4
+    name: File formats
+    analysis: 3
+    one_way: false
+    question: Which file types are in scope? (text · digital PDF · scanned PDF · Word · HTML · spreadsheets · slides · images · code · audio/video)
+    plain_question: What kinds of files are in the collection? For example Word documents, PDFs (and are any of them scans?), spreadsheets, slides, web pages, images, recordings.
+    plain_explanation: >
+      The kinds of files the system has to read. Each kind needs a different way of
+      extracting the text and content.
+    why_it_matters: >
+      Scanned documents need text recognition, spreadsheets and tables need special
+      handling, and recordings need transcription. Missing a format means that
+      information is silently left out.
+    answer_form:
+      type: multi-select with share
+      options: [plain text, digital PDF, scanned PDF, Word, HTML, spreadsheets, slides, images, code, audio/video]
+    where_to_find: [storage reports by file type, content owners, a sample of the collection]
+    typical_authority: [content_owners]
+    typical_informants: [it_infra, end_users]
+    sufficient_answer: The formats present with rough shares, ideally from a storage report or a sampled inventory.
+    default: null
+    drives: [parsing, OCR, table handling, transcription]
+
+  - id: B5
+    name: Content quality
+    analysis: 4
+    one_way: false
+    question: How clean is the content? (poor scans, handwriting, noisy audio, heavy misspellings, boilerplate)
+    plain_question: Are some documents hard to read, such as poor-quality scans, handwriting, messy audio, or lots of repeated boilerplate text?
+    plain_explanation: >
+      How readable the material is. Some documents are clean and digital; others are
+      blurry scans or rough recordings.
+    why_it_matters: >
+      Poor-quality material produces garbled text, and garbled text can't be searched
+      reliably. It may need cleanup, special tools, or exclusion.
+    answer_form:
+      type: description + share
+      contents: [issues present, rough share of affected documents]
+    where_to_find: [a sample review of the collection, content owners, past digitization projects]
+    typical_authority: [content_owners]
+    typical_informants: [end_users, it_infra]
+    sufficient_answer: Issues found in a sample of the collection, with a rough share affected.
+    default: some poor-quality content present
+    drives: [OCR quality, cleanup steps, exclusion rules]
+    source: Azure Architecture Center, RAG preparation phase
+
+  - id: B6
+    name: Document structure
+    analysis: 4
+    one_way: true
+    question: How structured are the documents? (unstructured prose · consistent headings/sections · forms · table-heavy)
+    plain_question: Do the documents follow a consistent layout (headings, numbered sections, forms), or are they mostly free-flowing text? Are there many tables?
+    plain_explanation: >
+      Whether documents have a predictable shape, like numbered sections or standard
+      forms, or are free-form writing.
+    why_it_matters: >
+      The system splits documents into small pieces before searching. Clear structure
+      lets it split along natural boundaries, which improves results. Changing the
+      splitting method later means reprocessing everything.
+    answer_form:
+      type: multi-select with share
+      options: [unstructured prose, consistent headings/sections, forms, table-heavy]
+    where_to_find: [document templates, style guides, a sample of the collection]
+    typical_authority: [content_owners]
+    typical_informants: [end_users]
+    sufficient_answer: Structure types with rough shares, based on a sample or templates.
+    default: mixed
+    drives: [chunking strategy]
+
+  - id: B7
+    name: Number of distinct document types
+    analysis: 4
+    one_way: true
+    question: How many distinct document types are there, and do they need different processing?
+    plain_question: How many different kinds of documents are there (for example contracts, policies, emails, reports), and do any of them need special handling?
+    plain_explanation: >
+      How many different kinds of documents are in the collection. Contracts, emails
+      and technical manuals each have their own shape.
+    why_it_matters: >
+      Each kind may need its own processing, which adds building and maintenance effort.
+      Too many kinds pushes the design toward one general approach.
+    answer_form:
+      type: list
+      contents: [document types, which need special handling]
+    where_to_find: [document-management categories, records retention schedule, content owners]
+    typical_authority: [content_owners]
+    typical_informants: [department_leads]
+    sufficient_answer: A list of document types covering most of the collection, confirmed by content owners.
+    default: null
+    drives: [per-type processing vs. one general approach]
+    source: Azure Architecture Center, RAG chunking phase
+
+  - id: B8
+    name: Document length
+    analysis: 2
+    one_way: true
+    question: What is the typical and maximum document length?
+    plain_question: How long is a typical document, and how long are the longest ones?
+    plain_explanation: >
+      The size of individual documents, from one-page memos to multi-hundred-page manuals.
+    why_it_matters: >
+      Long documents need to be split carefully so that pieces keep enough context to
+      make sense, sometimes with links back to the section they came from. This choice
+      is baked in when documents are loaded.
+    answer_form:
+      type: counts
+      contents: [typical length in pages, maximum length in pages]
+    where_to_find: [storage reports, a sample of the collection]
+    typical_authority: [content_owners]
+    typical_informants: [it_infra]
+    sufficient_answer: Typical and maximum page counts from a report or sample.
+    default: null
+    drives: [chunk size, parent-child retrieval]
+
+  - id: B9
+    name: Natural self-contained units
+    analysis: 4
+    one_way: false
+    question: Does the corpus divide into self-contained units (one contract, one case, one customer file), and how big are they compared with the LLM's context window?
+    plain_question: Are documents naturally grouped into complete sets, such as everything about one contract, one case or one customer? About how large is one such set?
+    plain_explanation: >
+      Whether the material falls into complete bundles, like one customer's full file,
+      that people ask about as a whole.
+    why_it_matters: >
+      When a bundle is small enough, the system can read the whole bundle instead of
+      searching pieces of it. That is the only reliable way to answer "does this contract
+      include X?", because searching can't prove something is absent.
+    answer_form:
+      type: yes/no + description
+      contents: [unit type, typical unit size]
+    where_to_find: [folder structure, case or matter management systems, content owners]
+    typical_authority: [content_owners]
+    typical_informants: [end_users, department_leads]
+    sufficient_answer: Whether units exist, what they are, and their typical size.
+    default: none
+    drives: [reading a whole unit, answers that say "not present", structured-field index]
+    related: [F3]
+
+  - id: B10
+    name: Languages
+    analysis: 2
+    one_way: true
+    question: Which languages are in the documents and the queries? Will people ask in one language about documents in another?
+    plain_question: Which languages are the documents written in, and which languages will people ask questions in? Will anyone ask in one language about documents written in another?
+    plain_explanation: >
+      The languages of the material and of the people asking questions.
+    why_it_matters: >
+      The component that captures meaning must support every language involved, and
+      handling questions in one language about documents in another needs specific
+      support. Switching that component later means reprocessing everything.
+    answer_form:
+      type: list + yes/no
+      contents: [document languages with shares, query languages, cross-language needed]
+    where_to_find: [content owners, user locations, a sample of the collection]
+    typical_authority: [content_owners, product_owner]
+    typical_informants: [end_users]
+    sufficient_answer: Languages with rough shares and a yes/no on cross-language use.
+    default: null
+    drives: [embedding model choice]
+
+  - id: B11
+    name: Specialized vocabulary and identifiers
+    analysis: 4
+    one_way: false
+    question: Is the vocabulary general or specialized? Do exact identifiers (codes, part numbers, clause numbers, case IDs) matter?
+    plain_question: Do the documents use specialist terms, codes or ID numbers (product codes, clause numbers, case numbers) that people will search for exactly?
+    plain_explanation: >
+      Whether the material uses everyday language or specialist jargon, codes and
+      identifiers that must be matched exactly.
+    why_it_matters: >
+      Meaning-based search is good with everyday phrasing but can miss exact codes and
+      jargon. Collections full of identifiers need exact-match search as well.
+    answer_form:
+      type: single choice + examples
+      options: [general, specialized vocabulary, exact identifiers matter]
+    where_to_find: [glossaries, product or parts catalogs, sample documents and searches]
+    typical_authority: [content_owners, department_leads]
+    typical_informants: [end_users]
+    sufficient_answer: One option with examples of the terms or identifiers people search for.
+    default: exact identifiers matter
+    drives: [keyword + meaning (hybrid) search, query-type rules]
+
+  - id: B12
+    name: Metadata
+    analysis: 5
+    one_way: true
+    question: What metadata exists per document (date, author, department, type, jurisdiction, access level), and how reliable is it?
+    plain_question: Besides their text, what information is recorded about each document, such as date, author, department, type, or who is allowed to see it? Is that information usually accurate?
+    plain_explanation: >
+      The labels attached to each document: when it was written, by whom, for which
+      department, and who may read it.
+    why_it_matters: >
+      Labels let the system narrow searches ("only 2024 HR policies") and enforce who
+      may see what. Some search systems need the labels planned before anything is
+      loaded, so unreliable or missing labels must be known early.
+    answer_form:
+      type: list + quality
+      contents: [fields available, reliability per field]
+    where_to_find: [document-management system settings, database schemas, a sample of documents]
+    typical_authority: [content_owners, data_eng]
+    typical_informants: [it_infra]
+    sufficient_answer: The fields available with a reliability rating, checked against a sample.
+    default: sparse and unreliable
+    drives: [metadata filtering, access enforcement, index setup]
+    related: [C5, E3]
+
+  - id: B13
+    name: Duplicates and versions
+    analysis: 5
+    one_way: false
+    question: Are there duplicates or multiple versions of the same document? Which version is authoritative?
+    plain_question: Does the collection contain copies or several versions of the same document? If so, how do you know which one is current or official?
+    plain_explanation: >
+      Whether the same document exists more than once, and how to tell the official
+      version from old drafts and copies.
+    why_it_matters: >
+      If the system can't tell versions apart, it may answer from an outdated draft.
+      Duplicates also crowd out other results.
+    answer_form:
+      type: level + rule
+      options: [none, some, many]
+      contents: [rule for the authoritative version]
+    where_to_find: [document-management versioning settings, naming conventions, content owners]
+    typical_authority: [content_owners]
+    typical_informants: [end_users]
+    sufficient_answer: A level plus the rule used to identify the authoritative version.
+    default: many; no reliable rule
+    drives: [deduplication, version filtering, recency ranking]
+
+  - id: B14
+    name: Point-in-time questions
+    analysis: 3
+    one_way: true
+    question: Will users ask what was true at a past date ("what was the policy in 2023?")?
+    plain_question: Will people need to ask what was true at a particular time in the past, for example "what was the travel policy in 2023?"
+    plain_explanation: >
+      Whether people need historical answers, not just the current ones.
+    why_it_matters: >
+      Answering "as of" questions requires keeping old versions and recording when each
+      was in effect, which has to be captured when documents are loaded.
+    answer_form:
+      type: yes/no + examples
+    where_to_find: [interviews with users, audit or legal requirements]
+    typical_authority: [product_owner, legal_privacy]
+    typical_informants: [end_users, compliance]
+    sufficient_answer: Yes or no with example questions.
+    default: no
+    drives: [effective-date metadata, version retention]
+    source: From general knowledge; no primary source found in the 2026-09-27 research pass.
+
+  - id: B15
+    name: Source authority and conflicts
+    analysis: 6
+    one_way: false
+    question: Do sources conflict? Is there a ranking of which sources to trust (e.g., official policy over team wiki)?
+    plain_question: If two documents disagree, which one should win? For example, does an official policy outrank a team wiki page or an email?
+    plain_explanation: >
+      Which sources are most trustworthy when documents disagree.
+    why_it_matters: >
+      Without a ranking, the system may present an informal note as if it were official
+      policy. With one, it can prefer authoritative sources and flag contradictions.
+    answer_form:
+      type: ranked list
+      contents: [source types in order of authority, known conflicts]
+    where_to_find: [document governance policies, content owners, department leads]
+    typical_authority: [content_owners, department_leads]
+    typical_informants: [end_users, compliance]
+    sufficient_answer: A ranking of source types, agreed by content owners for their areas.
+    default: official policies and records outrank working documents, which outrank informal notes
+    drives: [reranking, conflict detection, answer wording]
+
+  - id: B16
+    name: Provenance and lineage
+    analysis: 6
+    one_way: false
+    question: Can we tell whether documents are independent, or copies and derivatives of the same source?
+    plain_question: Can you usually tell where a document's information came from? For example, whether several reports all copy the same original spreadsheet.
+    plain_explanation: >
+      Whether it's possible to trace where information came from, so that five copies of
+      one spreadsheet aren't mistaken for five independent confirmations.
+    why_it_matters: >
+      When the system checks whether a fact is backed by several sources, copies of the
+      same source shouldn't count as independent agreement.
+    answer_form:
+      type: level
+      options: [traceable, partly traceable, not traceable]
+    where_to_find: [data lineage tools, document references and citations, content owners]
+    typical_authority: [content_owners, data_eng]
+    typical_informants: [department_leads]
+    sufficient_answer: A level with an example of how lineage is (or isn't) recorded.
+    default: not traceable
+    drives: [independence checks, evidence reliability policy]
+
+  - id: B17
+    name: How quickly facts go stale
+    analysis: 5
+    one_way: false
+    question: How volatile are the facts, by type? (e.g., prices change monthly; founding dates never)
+    plain_question: Which kinds of information in these documents go out of date quickly (for example prices, contacts, schedules), and which stay true for years?
+    plain_explanation: >
+      How fast different kinds of information become outdated.
+    why_it_matters: >
+      The system should treat a two-year-old price differently from a two-year-old
+      founding date. Knowing which facts expire lets it warn when information may be stale.
+    answer_form:
+      type: list
+      contents: [fact types, typical lifespan]
+    where_to_find: [content owners, update schedules, department leads]
+    typical_authority: [content_owners, department_leads]
+    typical_informants: [end_users]
+    sufficient_answer: The main fact types with an approximate lifespan for each.
+    default: treat any fact older than 12 months as possibly stale
+    drives: [staleness warnings, recency ranking]
+    related: [B3, D5]
+
+  - id: B18
+    name: Images, charts and tables that carry meaning
+    analysis: 4
+    one_way: true
+    question: Do answers depend on images, charts, diagrams, tables or equations, not just text?
+    plain_question: Is important information found in pictures, charts, diagrams or tables rather than in the written text?
+    plain_explanation: >
+      Whether key information lives in visuals, like a chart showing trends or a diagram
+      of a process, instead of in sentences.
+    why_it_matters: >
+      Text-only systems can't see what's in a picture. Visuals need to be described when
+      documents are loaded or read by a model that understands images, and that choice is
+      costly to change later.
+    answer_form:
+      type: yes/no + types + share
+      contents: [visual types, rough share of answers that depend on them]
+    where_to_find: [a sample of the collection, interviews with users]
+    typical_authority: [content_owners]
+    typical_informants: [end_users]
+    sufficient_answer: Yes or no, the kinds of visuals, and an example question that depends on one.
+    default: some answers depend on tables; few on images
+    drives: [describing visuals at load time vs. image-reading models at question time]
+    source: Azure Architecture Center, RAG preparation and information-retrieval phases
+
+  - id: B19
+    name: Harmful or copyrighted content
+    analysis: 4
+    one_way: false
+    question: Could the corpus contain harmful, offensive or third-party copyrighted content?
+    plain_question: Could the collection include offensive material, or content owned by someone else (for example purchased reports or copied articles) that shouldn't be reproduced?
+    plain_explanation: >
+      Whether some material is inappropriate to repeat, or belongs to someone else and
+      is under copyright.
+    why_it_matters: >
+      The system could repeat that material in its answers. Filters or exclusions may be
+      needed to avoid harm or copyright problems.
+    answer_form:
+      type: single choice + description
+      options: [present, possible, no]
+    where_to_find: [licensing records, content owners, legal]
+    typical_authority: [legal_privacy]
+    typical_informants: [content_owners]
+    sufficient_answer: One option, with the kinds of content involved, confirmed by legal.
+    default: possible
+    drives: [content-safety filters, exclusion rules]
+    source: Azure Architecture Center, RAG evaluation phase
+
+  - id: B20
+    name: Corpus completeness
+    analysis: 7
+    one_way: false
+    question: Should the corpus be complete for its domain? Which sources should be included but aren't (yet)?
+    plain_question: Is everything people will ask about actually in this collection? Are there other places where important information lives (other systems, shared drives, people's inboxes) that won't be included?
+    plain_explanation: >
+      Whether the collection covers everything people will ask about, or whether some
+      knowledge lives elsewhere and won't be searched.
+    why_it_matters: >
+      The system can only find what it's given. If important sources are missing, it
+      should say "that isn't covered" rather than suggest the information doesn't exist.
+    answer_form:
+      type: list
+      contents: [sources included, known sources not included, reason]
+    where_to_find: [system inventories, interviews with department leads and users, IT asset lists]
+    typical_authority: [department_leads, content_owners]
+    typical_informants: [end_users, it_infra]
+    sufficient_answer: A list of included and excluded sources per department, confirmed by each department lead.
+    default: incomplete; unknown gaps
+    drives: [scope registry, answers that say "not covered", corpus-gap diagnosis]
+
+  - id: B21
+    name: Data owners
+    analysis: 5
+    one_way: false
+    question: Does each source have an identifiable owner who can answer questions, fix errors and sign off on content?
+    plain_question: For each main source of documents, who is responsible for keeping it accurate?
+    plain_explanation: >
+      The named person or team responsible for each collection of documents.
+    why_it_matters: >
+      When the system finds an error, a gap or a contradiction, someone has to fix it.
+      Owners are also who sign off on the facts that important decisions rest on.
+    answer_form:
+      type: list
+      contents: [source, owner name or role]
+    where_to_find: [data governance records, document-management permissions, department leads]
+    typical_authority: [department_leads]
+    typical_informants: [content_owners, it_infra]
+    sufficient_answer: An owner for every main source, confirmed by the department lead.
+    default: null
+    drives: [sign-off routing, corpus-gap routing, error correction]
+    related: [O1]
+
+  - id: B22
+    name: Systems of record
+    analysis: 5
+    one_way: false
+    question: Which key facts have an authoritative operational system (billing, contracts, HR), and can the system reach it by API?
+    plain_question: For important facts like prices, contract terms or staff numbers, is there an official system where the correct value always lives? Could this system look values up there directly?
+    plain_explanation: >
+      The official systems where certain facts are always kept up to date, such as the
+      billing system for prices or the HR system for headcount.
+    why_it_matters: >
+      Documents can be wrong or outdated. Checking key facts against the official system
+      catches errors that no amount of document-checking would find.
+    answer_form:
+      type: list
+      contents: [fact type, system of record, API access yes/no]
+    where_to_find: [IT systems inventory, integration documentation, data_eng]
+    typical_authority: [it_infra, data_eng]
+    typical_informants: [department_leads]
+    sufficient_answer: The main fact types with their system of record and whether access is possible.
+    default: none reachable
+    drives: [checking claims against systems of record]
+
+  # ==================== GROUP I — SOURCES & INGESTION ====================
+
+  - id: I1
+    name: Source landscape
+    analysis: 5
+    one_way: true
+    question: >
+      How many sources hold the content, and of what kinds? (one document store · several
+      stores · APIs · databases · SaaS apps) Must the system choose between sources per question?
+    plain_question: >
+      Where does the information people will ask about live today? List the main places,
+      for example SharePoint, Google Drive, a CRM, a database, a ticketing system, email.
+    plain_explanation: >
+      All the places the system will need to pull information from, and how different
+      they are from each other.
+    why_it_matters: >
+      One collection of documents can be handled with a simple design. Many different
+      sources, especially live systems like databases, may need a design that decides
+      where to look for each question. That is slower and costlier (roughly 8–15 seconds
+      per answer instead of 2–3), so it should only be used when needed.
+    answer_form:
+      type: list
+      contents: [source name, kind (documents, API, database, app), department, approximate size]
+    where_to_find: [IT systems inventory, software subscriptions list, interviews with department leads]
+    typical_authority: [it_infra]
+    typical_informants: [department_leads, data_eng, content_owners]
+    sufficient_answer: A list of every source in scope with its kind and owning department, confirmed by IT.
+    default: null
+    drives: [standard vs. agentic retrieval, connectors, latency budget]
+    source: Azure Architecture Center, agentic RAG guidance
+    related: [B20, B22]
+
+  - id: I2
+    name: Ingestion reachability
+    analysis: 3
+    one_way: false
+    question: Can the ingestion pipeline reach each source, or is content behind authentication, a network perimeter, or on-premises only?
+    plain_question: >
+      Are any of these sources only reachable from inside the office network, behind special
+      logins, or stored on local servers rather than in the cloud?
+    plain_explanation: >
+      Whether the system can actually get to each source, or whether some are locked
+      behind company networks or special access.
+    why_it_matters: >
+      Sources that can't be reached from outside may require the loading process to run
+      inside the company's network, which changes where parts of the system are hosted.
+    answer_form:
+      type: per source
+      options: [reachable from cloud, needs credentials/service account, inside network only, not reachable]
+    where_to_find: [network diagrams, IT access policies, the systems inventory]
+    typical_authority: [it_infra, security]
+    typical_informants: [data_eng]
+    sufficient_answer: Reachability for every source in I1, confirmed by IT or security.
+    default: inside network only
+    drives: [where ingestion runs, connector design, hosting]
+    source: Azure Architecture Center, RAG preparation phase
+
+  - id: I3
+    name: Permission sync
+    analysis: 6
+    one_way: true
+    question: Can each source's access permissions be read and carried down to every chunk, and kept in sync when permissions change?
+    plain_question: >
+      In the systems where documents live today, can we read who is allowed to see each
+      document? When someone's access changes, how quickly does that change take effect?
+    plain_explanation: >
+      Whether the system can copy the existing "who may see this" rules from each source,
+      so that people only get answers from documents they're already allowed to open.
+    why_it_matters: >
+      If permissions aren't carried over, the system could show someone information they
+      aren't allowed to see. Building permission handling in from the start is far easier
+      than adding it later.
+    answer_form:
+      type: per source
+      options: [permissions readable and synced, readable but not synced, not readable, no permissions (all staff may see everything)]
+    where_to_find: [source system admin settings, identity provider (e.g., Entra ID, Okta, Google Workspace), IT security documentation]
+    typical_authority: [security, it_infra]
+    typical_informants: [content_owners, data_eng]
+    sufficient_answer: A status per source plus how quickly access changes propagate, confirmed by security.
+    default: not readable
+    default_note: Conservative. Until confirmed, assume permissions must be designed separately.
+    drives: [access enforcement at retrieval time, index partitioning]
+    source: Azure Architecture Center, RAG preparation phase; OWASP LLM08
+    related: [E3, E4, B12]
+
+  - id: I4
+    name: Change notifications
+    analysis: 3
+    one_way: false
+    question: Do sources emit change events (webhooks, change feeds, audit logs), or must they be re-scanned to detect updates?
+    plain_question: >
+      When a document is added, changed or deleted, can these systems notify other software
+      automatically, or would the system need to check them regularly?
+    plain_explanation: >
+      Whether the source systems announce changes as they happen, or have to be checked
+      periodically.
+    why_it_matters: >
+      Automatic notifications let the system stay up to date quickly and cheaply. Without
+      them, it has to re-scan sources on a schedule, which is slower and costs more for
+      large collections.
+    answer_form:
+      type: per source
+      options: [change events available, audit log only, re-scan required]
+    where_to_find: [source system API documentation, IT integration team]
+    typical_authority: [data_eng, it_infra]
+    typical_informants: [content_owners]
+    sufficient_answer: A status per source, from the integration owner or the system's documentation.
+    default: re-scan required
+    drives: [freshness design, ingestion cost]
+    related: [B3, D5]
+
+  - id: I5
+    name: Answers held in databases
+    analysis: 4
+    one_way: false
+    question: >
+      Are some answers held in structured databases (counts, totals, trends, lists) rather
+      than documents? These suit database queries (e.g., text-to-SQL), not document search.
+    plain_question: >
+      Will people ask questions whose answers are numbers or lists kept in systems or
+      spreadsheets, such as "how many open orders do we have?" or "which clients renewed
+      last quarter?"
+    plain_explanation: >
+      Whether some questions are really about data in tables and databases, rather than
+      about what documents say.
+    why_it_matters: >
+      Document search is poor at counting and totaling. Questions like these need the
+      system to query the database directly. Missing this means confident but wrong numbers.
+    answer_form:
+      type: yes/no + examples + systems
+      contents: [example questions, databases or spreadsheets involved]
+    where_to_find: [interviews with users, reporting and BI tools, the systems inventory]
+    typical_authority: [data_eng, product_owner]
+    typical_informants: [end_users, department_leads]
+    sufficient_answer: Yes or no with example questions and the systems that hold the answers.
+    default: some
+    drives: [adding a database-query path alongside document search]
+    source: Secondary sources only in the 2026-09-27 research pass (unverified against a primary source).
+    related: [C3]
+
+  # ==================== GROUP C — QUERIES ====================
+
+  - id: C1
+    name: Who asks
+    analysis: 3
+    one_way: false
+    question: Who writes the queries? (domain experts · general staff · customers/public · another system or AI agent)
+    plain_question: >
+      Who will be asking the system questions? Specialists in their field, general staff,
+      customers, or another piece of software?
+    plain_explanation: >
+      The people (or programs) who will use the system, and how much they already know
+      about the subject.
+    why_it_matters: >
+      Experts use precise terms; newcomers describe things loosely and may need their
+      question reworded before searching. Customers and the public also raise security
+      and abuse concerns that internal staff don't.
+    answer_form:
+      type: mix with shares
+      options: [domain experts, general staff, customers/public, another system or AI agent]
+    where_to_find: [project brief, intended user groups, interviews with the product owner]
+    typical_authority: [product_owner]
+    typical_informants: [department_leads, end_users]
+    sufficient_answer: User groups with rough shares, confirmed by the product owner.
+    default: general staff
+    drives: [query rewriting, vocabulary handling, abuse protections]
+    related: [E9, A12]
+
+  - id: C2
+    name: How questions are phrased
+    analysis: 4
+    one_way: false
+    question: What share of queries use exact terms or identifiers vs. natural-language descriptions?
+    plain_question: >
+      Do people mostly search with exact names, codes or numbers ("invoice 4471",
+      "clause 12.3"), or describe what they want in their own words ("what's our refund
+      policy for damaged goods?")? Roughly what share of each?
+    plain_explanation: >
+      Whether people tend to look things up by exact names and numbers, or by describing
+      what they mean.
+    why_it_matters: >
+      Exact lookups need exact-match search; descriptive questions need meaning-based
+      search. Knowing the mix sets how the two are balanced.
+    answer_form:
+      type: mix with shares
+      options: [exact terms/identifiers, natural-language descriptions]
+    where_to_find: [search logs from existing tools, help-desk tickets, interviews with users]
+    typical_authority: [product_owner]
+    typical_informants: [end_users, support_ops]
+    sufficient_answer: A rough split, ideally based on real search logs or ticket samples.
+    default: 30% exact, 70% descriptive
+    drives: [keyword vs. meaning weighting, query-type rules]
+    related: [B11]
+
+  - id: C3
+    name: Kinds of questions
+    analysis: 6
+    one_way: true
+    question: >
+      What is the mix of query types? Each type points to a different architecture.
+    plain_question: >
+      Thinking of real questions people will ask, roughly what share are: simple fact
+      lookups; questions with several parts; questions that need information combined from
+      several documents; counts or totals ("how many…"); big-picture themes ("what are the
+      main complaints this year?"); or checks for whether something is missing ("does this
+      contract include a termination clause?")?
+    plain_explanation: >
+      The different kinds of questions people ask. "What's the holiday policy?" is a simple
+      lookup; "summarize the main risks across all our contracts" is a very different task.
+    why_it_matters: >
+      Each kind of question works best with a different design: simple search, step-by-step
+      search across documents, database queries, whole-collection summaries, or reading a
+      complete document to prove something is absent. A design chosen for the wrong kind of
+      question is costly to rebuild.
+    answer_form:
+      type: mix with shares
+      options:
+        - simple lookup
+        - multi-part
+        - multi-hop (combine several documents)
+        - counts/totals over structured data
+        - global themes across the collection
+        - absence checks ("does X include Y?")
+    where_to_find: [real example questions from users, help-desk tickets, search logs, workshop with department leads]
+    typical_authority: [product_owner, department_leads]
+    typical_informants: [end_users, support_ops]
+    sufficient_answer: Shares across the types, backed by at least ten real example questions.
+    default: null
+    default_note: Must be answered from real example questions; it chooses between fundamentally different designs.
+    drives: [question routing, step-by-step retrieval, database queries (I5), whole-collection summaries (GraphRAG), structured-field index and whole-unit reading (B9)]
+    source: Microsoft GraphRAG documentation; Azure agentic RAG guidance
+    related: [I5, B9]
+
+  - id: C4
+    name: Follow-up questions
+    analysis: 2
+    one_way: false
+    question: Is the interaction conversational, with follow-ups that refer back to earlier turns?
+    plain_question: >
+      Will people have a back-and-forth conversation ("and what about for part-time
+      staff?"), or ask one standalone question at a time?
+    plain_explanation: >
+      Whether people ask follow-up questions that only make sense with the earlier
+      conversation in mind.
+    why_it_matters: >
+      A follow-up like "what about last year?" can't be searched on its own. The system
+      has to rewrite it using the earlier conversation first.
+    answer_form:
+      type: yes/no
+    where_to_find: [product requirements, how users will reach the system]
+    typical_authority: [product_owner]
+    typical_informants: [end_users]
+    sufficient_answer: Yes or no, from the product owner.
+    default: yes
+    drives: [query rewriting, conversation memory]
+
+  - id: C5
+    name: Narrowed searches and how narrow they get
+    analysis: 5
+    one_way: true
+    question: >
+      Do queries carry scope (date range, department, jurisdiction, client, document type)?
+      Which fields? What fraction of the corpus does a typical filter match?
+    plain_question: >
+      Do people usually narrow their questions, for example to one client, one year, one
+      region or one type of document? When they do, roughly how much of the collection is
+      left: about half, a tenth, or just a handful of documents?
+    plain_explanation: >
+      Whether questions are usually limited to a slice of the collection, and how small
+      that slice tends to be.
+    why_it_matters: >
+      Some search technologies quietly return too few results when a search is narrowed
+      to a small slice. If narrow searches are common, the search technology and its
+      setup must be chosen to handle them, and that's hard to change later.
+    answer_form:
+      type: list + share
+      contents: [filter fields, typical share of the collection a filter leaves (e.g., 50%, 10%, 1%)]
+    where_to_find: [search logs, interviews with users, the metadata available (B12)]
+    typical_authority: [product_owner, data_eng]
+    typical_informants: [end_users]
+    sufficient_answer: The common filter fields and a typical remaining share for each.
+    default: filters common; often leave under 10% of the collection
+    drives: [filtering before search, index type and settings]
+    source: pgvector, Milvus, Weaviate and Qdrant documentation on filtered search
+    note: '"Filter selectivity" is defined here as the share of the collection a filter keeps (vendors use opposite conventions).'
+    related: [B12, E3]
+
+  - id: C6
+    name: Where answers sit
+    analysis: 4
+    one_way: false
+    question: Is a typical answer found in one passage, spread across many passages, or in tables?
+    plain_question: >
+      Is the answer to a typical question usually in one paragraph, scattered across
+      several documents, or inside a table?
+    plain_explanation: >
+      Whether answers tend to sit in one place or have to be pieced together.
+    why_it_matters: >
+      Scattered answers need the system to gather and combine more material, which affects
+      how much it retrieves and how it assembles the answer.
+    answer_form:
+      type: mix with shares
+      options: [one passage, several passages, tables]
+    where_to_find: [sample questions with their answers, interviews with users]
+    typical_authority: [product_owner]
+    typical_informants: [end_users, content_owners]
+    sufficient_answer: A rough split, based on sample questions and where their answers were found.
+    default: mostly one passage; some spread across several
+    drives: [how many results to retrieve, how context is assembled]
+    related: [C3]
+
+  - id: C7
+    name: Usage volume
+    analysis: 4
+    one_way: false
+    question: Average and peak queries per second; number of concurrent users; expected growth.
+    plain_question: >
+      How many people will use the system, and how often? Roughly how many questions per day
+      on a normal day, and on the busiest days?
+    plain_explanation: >
+      How heavily the system will be used, on average and at its busiest.
+    why_it_matters: >
+      Heavy use needs faster, more scalable infrastructure and affects running costs.
+      Light use allows simpler, cheaper choices.
+    answer_form:
+      type: numbers
+      contents: [users, questions per day (normal), questions per day (peak), growth]
+    where_to_find: [headcount of user groups (O1), usage of existing tools, product plans]
+    typical_authority: [product_owner, it_infra]
+    typical_informants: [people_ops, department_leads]
+    sufficient_answer: User count and daily volumes (normal and peak), with the basis for the estimate.
+    default: derived from O1 headcount × 5 questions per user per day; peak = 3× average
+    drives: [index type, hosting, cost]
+    related: [O1, D3, D4]
+
+  - id: C8
+    name: Questions that don't need company documents
+    analysis: 3
+    one_way: false
+    question: What share of queries can be answered from general knowledge without retrieval?
+    plain_question: >
+      Will people also ask general questions that don't depend on company documents, like
+      "how do I write a polite reminder email?"? Roughly what share?
+    plain_explanation: >
+      How many questions could be answered by the AI on its own, without searching company
+      material.
+    why_it_matters: >
+      Skipping the search for these saves time and cost, but the system must be careful
+      not to answer company-specific questions from general knowledge.
+    answer_form:
+      type: share
+    where_to_find: [sample questions, interviews with users]
+    typical_authority: [product_owner]
+    typical_informants: [end_users]
+    sufficient_answer: A rough share, with examples.
+    default: 10%
+    drives: [routing questions to "no search needed"]
+
+  - id: C9
+    name: Questions the documents can't answer
+    analysis: 5
+    one_way: false
+    question: What share of queries will have no answer in the corpus?
+    plain_question: >
+      How often do you expect people to ask about something that simply isn't covered in
+      the documents?
+    plain_explanation: >
+      How often the honest answer will be "that isn't in our documents".
+    why_it_matters: >
+      The system needs to recognize these cases and say so, rather than guess. Knowing how
+      common they are helps tune and test that behavior.
+    answer_form:
+      type: share
+    where_to_find: [help-desk tickets that were escalated, search logs with no results, interviews with users]
+    typical_authority: [product_owner, support_ops]
+    typical_informants: [end_users, content_owners]
+    sufficient_answer: A rough share, based on tickets, logs or user estimates.
+    default: 15%
+    drives: [abstention tuning, test-set design (unanswerable questions)]
+    related: [A5, B20, G1]
+
+  # ==================== GROUP D — PERFORMANCE & COST ====================
+
+  - id: D1
+    name: Speed vs. accuracy
+    analysis: 4
+    one_way: false
+    question: >
+      What is the maximum acceptable response time (typical and worst case), and how much
+      extra waiting is acceptable in exchange for better accuracy? Per tier if stakes vary.
+    plain_question: >
+      How long can someone reasonably wait for an answer: a second or two, ten seconds, a
+      minute? For important questions, would people accept waiting longer if the answer
+      were more thorough and reliable?
+    plain_explanation: >
+      How fast answers must arrive, and whether people would trade some speed for a more
+      careful answer.
+    why_it_matters: >
+      Extra checking steps make answers more reliable but slower. Knowing the acceptable
+      wait, and whether it differs for important questions, decides which of those steps
+      can be used.
+    answer_form:
+      type: seconds per tier
+      contents: [typical acceptable wait, worst-case acceptable wait, longer wait acceptable for higher accuracy (yes/no, how long)]
+    where_to_find: [product requirements, service-level expectations, interviews with users]
+    typical_authority: [product_owner]
+    typical_informants: [end_users, department_leads]
+    sufficient_answer: Acceptable waits per tier, plus whether a slower, more careful mode is acceptable.
+    default: 5 seconds standard; up to 60 seconds for high-stakes questions
+    drives: [reranking, checking loops, multi-step retrieval, stakes modes]
+    conflicts_with: [A2]
+    source: Azure Architecture Center (latency treated as a trade against accuracy)
+
+  - id: D2
+    name: One-time setup budget
+    analysis: 4
+    one_way: false
+    question: What budget is available for initial ingestion and enrichment (parsing, OCR, AI-generated context per chunk, initial embedding)?
+    plain_question: >
+      Is there a budget for the one-time work of loading and preparing all the documents?
+      Roughly how much?
+    plain_explanation: >
+      The money available for the one-off job of loading and preparing the collection at
+      the start.
+    why_it_matters: >
+      Some preparation steps (such as adding a short AI-written summary to every piece of
+      a document) noticeably improve search quality but cost money for every page.
+      The setup budget decides whether those steps are affordable.
+    answer_form:
+      type: amount
+    where_to_find: [project budget, finance approvals, business case]
+    typical_authority: [finance, sponsor]
+    typical_informants: [product_owner]
+    sufficient_answer: An approved amount (or range) from finance or the sponsor.
+    default: null
+    drives: [parser choice, contextual enrichment, OCR quality]
+    source: Azure Architecture Center (RAG enrichment phase); Anthropic Contextual Retrieval
+    related: [B1]
+
+  - id: D3
+    name: Cost per question
+    analysis: 4
+    one_way: false
+    question: What is the acceptable cost per query (and per tier, if stakes vary)?
+    plain_question: >
+      Is there a limit on what each answered question may cost to produce? Would you pay
+      more for important questions that get extra checking?
+    plain_explanation: >
+      How much each answer may cost to produce. Simple answers cost fractions of a cent;
+      heavily checked answers can cost much more.
+    why_it_matters: >
+      Extra checking steps call the AI several times per question. A cost limit per
+      question decides which steps can run on every question and which only on important ones.
+    answer_form:
+      type: amount per tier
+    where_to_find: [business case, finance, value of the work being supported]
+    typical_authority: [finance, sponsor]
+    typical_informants: [product_owner]
+    sufficient_answer: A limit per question (per tier if it differs), from finance or the sponsor.
+    default: low for standard questions; higher allowed for high-stakes questions
+    drives: [reranking, checking loops, model size, stakes modes]
+    related: [C7, A7]
+
+  - id: D4
+    name: Monthly running budget
+    analysis: 4
+    one_way: false
+    question: What is the monthly ceiling for infrastructure and operation (hosting, vector database, models, monitoring)?
+    plain_question: >
+      What is the monthly budget for running the system, including hosting, software
+      subscriptions and AI usage?
+    plain_explanation: >
+      The ongoing monthly cost limit for keeping the system running.
+    why_it_matters: >
+      It decides between managed services and self-hosting, and how much capacity can be
+      kept available.
+    answer_form:
+      type: amount per month
+    where_to_find: [project budget, finance, existing IT spend]
+    typical_authority: [finance, sponsor]
+    typical_informants: [it_infra]
+    sufficient_answer: An approved monthly ceiling from finance or the sponsor.
+    default: null
+    drives: [managed vs. self-hosted, hosting size]
+    related: [C7, F4]
+
+  - id: D5
+    name: How fresh answers must be
+    analysis: 3
+    one_way: false
+    question: How soon after a document is added or changed must it be retrievable? (seconds · minutes · daily · weekly)
+    plain_question: >
+      When a document is added or updated, how soon must the system know about it:
+      immediately, within an hour, by the next day, or within a week?
+    plain_explanation: >
+      How quickly new or changed information must show up in answers.
+    why_it_matters: >
+      Near-instant updates need a continuously running loading process, which costs more.
+      Daily or weekly updates are simpler and cheaper.
+    answer_form:
+      type: single choice
+      options: [seconds, minutes, daily, weekly]
+    where_to_find: [product requirements, how quickly decisions depend on new information]
+    typical_authority: [product_owner, department_leads]
+    typical_informants: [end_users, content_owners]
+    sufficient_answer: One option, with an example of why that speed is needed.
+    default: daily
+    drives: [ingestion schedule, change notifications (I4)]
+    related: [B3, I4, B17]
+
+  - id: D6
+    name: Uptime and recovery
+    analysis: 3
+    one_way: false
+    question: What uptime is required, and is failover or disaster recovery needed?
+    plain_question: >
+      How important is it that the system is always available? Would an outage of an hour,
+      or a day, cause real problems?
+    plain_explanation: >
+      How much downtime is acceptable, and whether a backup setup is needed if something fails.
+    why_it_matters: >
+      High availability means duplicate infrastructure, possibly in another region, which
+      raises cost. Many internal tools don't need it.
+    answer_form:
+      type: single choice + target
+      options: [best effort, business hours, high availability, high availability + disaster recovery]
+    where_to_find: [service-level agreements, business continuity plans, IT policies]
+    typical_authority: [it_infra, sponsor]
+    typical_informants: [product_owner]
+    sufficient_answer: One option with an acceptable outage length, confirmed by IT or the sponsor.
+    default: business hours
+    drives: [hosting topology, backups, choice of vector database]
+    source: Google Cloud RAG reference architecture
+
+  # ==================== GROUP E — SECURITY & COMPLIANCE ====================
+
+  - id: E1
+    name: Data sensitivity
+    analysis: 5
+    one_way: false
+    question: >
+      What is the classification of the data in scope? (public · internal · confidential ·
+      regulated personal or health data · legally privileged) Per source or department if it varies.
+    plain_question: >
+      How sensitive is the information the system will use? Is any of it confidential,
+      personal information about staff or customers, health information, or legally privileged?
+    plain_explanation: >
+      How carefully the information must be protected, from material that could be published
+      to material that is confidential, personal or legally protected.
+    why_it_matters: >
+      Sensitivity sets the protection level for everything else: where data may be processed,
+      who may see it, what may be logged and how long it may be kept. The system's own internal
+      copies of the data count too, because the original text can sometimes be reconstructed from them.
+    answer_form:
+      type: level per source or department
+      options: [public, internal, confidential, regulated personal or health data, legally privileged]
+    where_to_find: [data classification policy, information security policy, privacy notices, records of processing]
+    typical_authority: [security, legal_privacy]
+    typical_informants: [content_owners, department_leads, compliance]
+    sufficient_answer: A classification for every source in scope, confirmed by security or legal/privacy.
+    default: confidential
+    drives: [processing location (E2), access control (E3), logging (E6), retention (E5), encryption]
+    source: OWASP LLM08 (vector and embedding weaknesses; embeddings can be inverted to recover text)
+
+  - id: E2
+    name: Where data may be processed
+    analysis: 6
+    one_way: true
+    question: >
+      Where may data, embeddings and intermediate copies be sent or stored? (any cloud ·
+      specific region · approved vendors only · on-premises only · air-gapped) This applies to
+      EVERY external step: OCR and parsing services, embedding, reranking, the LLM, evaluation tools.
+    plain_question: >
+      Are there rules about where company information may be sent or stored? For example,
+      must it stay in a particular country, with approved vendors only, or on the company's own servers?
+    plain_explanation: >
+      The places, companies and countries the information is allowed to pass through, including
+      every outside service the system would use along the way.
+    why_it_matters: >
+      If data must stay on the company's own servers or in one region, many cloud AI services
+      are ruled out, and the whole design changes. Discovering this late can mean rebuilding
+      with different components.
+    answer_form:
+      type: single choice + constraints
+      options: [any cloud, specific region, approved vendors only, on-premises only, air-gapped]
+      contents: [allowed regions, approved vendors]
+    where_to_find: [data residency policy, vendor approval list, customer contracts, privacy notices, regulatory requirements]
+    typical_authority: [security, legal_privacy]
+    typical_informants: [it_infra, compliance]
+    sufficient_answer: One option with any region or vendor constraints, confirmed by security or legal/privacy, covering every external step.
+    default: approved vendors only
+    default_note: Conservative. Until confirmed, every external service must be on an approved list.
+    drives: [hosted vs. local models, vector database hosting, choice of parsing, reranking and evaluation services]
+    source: Azure Architecture Center (residency applies to every external step)
+
+  - id: E3
+    name: Who may see what
+    analysis: 6
+    one_way: true
+    question: Do different users see different documents? (no restrictions · by role or group · per document)
+    plain_question: >
+      Should everyone using the system be able to see answers from all documents, or should
+      people only get answers from documents they're already allowed to open?
+    plain_explanation: >
+      Whether access to information is restricted, and how finely: by team, by role, or
+      document by document.
+    why_it_matters: >
+      If access is restricted, the system must check permissions on every search, or it could
+      reveal information to the wrong person. This has to be designed in from the start.
+    answer_form:
+      type: single choice
+      options: [no restrictions, by role or group, per document]
+    where_to_find: [access control policies, source system permissions (I3), identity provider groups]
+    typical_authority: [security]
+    typical_informants: [content_owners, it_infra, department_leads]
+    sufficient_answer: One option, with the groups or rules involved, confirmed by security.
+    default: per document
+    drives: [permission checks during search, index partitioning]
+    related: [I3, B12, C5]
+
+  - id: E4
+    name: Multiple separate customers or business units
+    analysis: 5
+    one_way: true
+    question: >
+      Is one system shared by several tenants (customers, subsidiaries, business units) whose
+      data must be strictly separated? How many, how large, any cross-tenant queries, and how are tenants offboarded?
+    plain_question: >
+      Will this one system serve several separate customers, companies or business units
+      whose information must never mix? If so, how many, and will anyone ever need to search across them?
+    plain_explanation: >
+      Whether the system serves several groups whose information must be kept completely
+      separate, like different clients of the same firm.
+    why_it_matters: >
+      Strict separation is usually built into how data is stored, either one store per group
+      or a shared store with filters. Switching between those later means moving all the data,
+      and getting it wrong risks one client seeing another's information.
+    answer_form:
+      type: yes/no + details
+      contents: [number of tenants, typical size, cross-tenant search needed, offboarding requirements]
+    where_to_find: [business model, customer contracts, organizational structure (O1)]
+    typical_authority: [security, product_owner]
+    typical_informants: [it_infra, legal_privacy]
+    sufficient_answer: Yes or no; if yes, tenant count, size range and cross-tenant needs, confirmed by security.
+    default: no
+    drives: [separate store per tenant vs. shared store with filters, offboarding process]
+    source: Pinecone multitenancy guidance; OWASP LLM08
+
+  - id: E5
+    name: Retention and deletion obligations
+    analysis: 6
+    one_way: true
+    question: >
+      What retention and deletion obligations apply? (erasure requests, legal holds, retention
+      schedules, how fast removed documents must disappear from answers)
+    plain_question: >
+      Are there rules about how long information must be kept, or how quickly it must be
+      deleted, for example when a person asks for their data to be erased or a legal hold applies?
+    plain_explanation: >
+      Rules for keeping or deleting information, including how quickly deleted documents
+      must stop appearing in answers.
+    why_it_matters: >
+      Some search technologies don't remove deleted items right away. If deletions must be
+      immediate and complete, that limits the technology choices and has to be planned from the start.
+    answer_form:
+      type: list
+      contents: [obligations, how fast removal must take effect]
+    where_to_find: [records retention schedule, privacy policy, legal hold procedures, regulatory requirements]
+    typical_authority: [legal_privacy, compliance]
+    typical_informants: [content_owners, it_infra]
+    sufficient_answer: The obligations that apply and the required removal speed, confirmed by legal/privacy.
+    default: deletions must take effect within 24 hours
+    drives: [index choice (deletion support), rebuild strategy, backup handling]
+    source: FAISS and Weaviate documentation (deletion and tombstone behavior)
+
+  - id: E6
+    name: Logging limits
+    analysis: 4
+    one_way: false
+    question: May queries, retrieved content and answers be logged? (yes · redacted · no) For how long?
+    plain_question: >
+      May the system keep a record of the questions people ask and the answers it gives? If so,
+      must personal details be removed first, and how long may records be kept?
+    plain_explanation: >
+      Whether, and how, the system may keep records of its conversations.
+    why_it_matters: >
+      Records are needed for audits, troubleshooting and improving the system, but they can
+      contain sensitive information. The rules here must be reconciled with any audit-trail
+      requirement.
+    answer_form:
+      type: single choice + retention
+      options: [yes, redacted, no]
+    where_to_find: [privacy policy, logging and monitoring standards, employee monitoring rules]
+    typical_authority: [legal_privacy, security]
+    typical_informants: [compliance, it_infra]
+    sufficient_answer: One option with a retention period, confirmed by legal/privacy.
+    default: redacted, 90 days
+    drives: [audit trail design, monitoring, evaluation data collection]
+    conflicts_with: [A4, G5]
+
+  - id: E7
+    name: Applicable regulations
+    analysis: 8
+    one_way: false
+    question: Which regulations and legal regimes apply? (e.g., GDPR, CCPA, HIPAA, EU AI Act, SOX, sector rules, legal privilege)
+    plain_question: >
+      Which laws or industry regulations apply to this information or to the company's use of
+      AI? For example data protection laws, health or financial regulations, or AI-specific rules.
+    plain_explanation: >
+      The laws and industry rules the system must comply with.
+    why_it_matters: >
+      Regulations can require explanations of how answers were produced, human oversight,
+      specific record-keeping or limits on automated decisions. Missing one can create legal
+      exposure after launch.
+    answer_form:
+      type: list
+      contents: [regulation, what it requires of this system]
+    where_to_find: [compliance register, legal counsel, industry bodies, external research on AI regulation in the company's jurisdictions]
+    typical_authority: [legal_privacy, compliance]
+    typical_informants: [department_leads, security]
+    sufficient_answer: A list of applicable regulations with their requirements for this system, confirmed by legal or compliance.
+    default: null
+    default_note: Must be confirmed by legal or compliance; external research may be needed for AI-specific rules.
+    drives: [explainability, human oversight, record-keeping, restrictions on automated decisions]
+
+  - id: E8
+    name: Untrusted content in the collection
+    analysis: 5
+    one_way: false
+    question: Can outsiders put content into what gets indexed (web pages, inbound emails, customer uploads, shared drives open to partners)?
+    plain_question: >
+      Could people outside the company, or anyone unvetted, add content that the system will
+      read? For example, emails from customers, uploaded files or public web pages.
+    plain_explanation: >
+      Whether some of the material comes from people who aren't trusted, and could be written
+      to mislead the system.
+    why_it_matters: >
+      Text written by outsiders can contain hidden instructions designed to trick the AI into
+      leaking information or giving false answers. Such content needs special handling and testing.
+    answer_form:
+      type: yes/no + sources
+      contents: [sources open to outsiders]
+    where_to_find: [source list (I1), sharing settings, intake processes for external content]
+    typical_authority: [security]
+    typical_informants: [content_owners, it_infra]
+    sufficient_answer: Yes or no, with the sources involved, confirmed by security.
+    default: yes
+    default_note: Conservative. Assume at least one source contains outside content until confirmed otherwise.
+    drives: [content sanitization, treating retrieved text as data never as instructions, adversarial testing]
+    source: OWASP LLM01 (indirect prompt injection); OWASP LLM08 (data poisoning)
+
+  - id: E9
+    name: Public exposure and abuse
+    analysis: 4
+    one_way: false
+    question: Will the system be reachable by the public or by untrusted users? Are usage quotas and abuse protections needed?
+    plain_question: >
+      Will people outside the company be able to use the system? Could anyone try to misuse it,
+      for example to extract confidential information or run up costs?
+    plain_explanation: >
+      Whether outsiders can reach the system, and the risk of deliberate misuse.
+    why_it_matters: >
+      Public systems attract attempts to trick them and can run up large bills through heavy
+      use. They need usage limits and extra safeguards that internal tools may not.
+    answer_form:
+      type: single choice
+      options: [internal only, partners or customers (authenticated), public]
+    where_to_find: [product requirements, launch plans]
+    typical_authority: [security, product_owner]
+    typical_informants: [it_infra]
+    sufficient_answer: One option, confirmed by security.
+    default: internal only
+    drives: [rate limits, per-user quotas, input limits, abuse monitoring]
+    source: OWASP LLM10 (unbounded consumption)
+    related: [C1]
+
+  - id: E10
+    name: Encryption keys and network isolation
+    analysis: 4
+    one_way: true
+    question: Are customer-managed encryption keys, private networking or data-exfiltration perimeters required?
+    plain_question: >
+      Does the company require control of its own encryption keys, or that systems run only
+      inside a private, isolated network?
+    plain_explanation: >
+      Extra technical protections some companies require, such as holding their own encryption
+      keys or keeping systems off the public internet.
+    why_it_matters: >
+      Not every service supports these requirements. If they apply, they narrow the choice of
+      databases and hosting, and switching later means migrating.
+    answer_form:
+      type: multi-select
+      options: [customer-managed keys, private networking, exfiltration perimeter, none]
+    where_to_find: [information security standards, cloud architecture policies, security team]
+    typical_authority: [security]
+    typical_informants: [it_infra]
+    sufficient_answer: The requirements that apply, confirmed by security.
+    default: none
+    drives: [choice of vector database and hosting, network topology]
+    source: Google Cloud RAG reference architecture
+
+  # ==================== GROUP F — ENVIRONMENT & TEAM ====================
+
+  - id: F1
+    name: Existing infrastructure
+    analysis: 4
+    one_way: false
+    question: >
+      What is already in place that the system could reuse? (cloud provider, databases such as
+      Postgres/pgvector, search such as Elasticsearch/OpenSearch, identity provider, monitoring)
+    plain_question: >
+      Which cloud services, databases and other technical systems does the company already use
+      and pay for? Are there any the company would prefer this system to reuse?
+    plain_explanation: >
+      The technology the company already has, which the new system might be built on.
+    why_it_matters: >
+      Reusing what's already in place usually lowers cost and makes the system easier to support,
+      but only if it fits the job. Knowing what exists keeps the design from adding tools the team
+      would then have to learn and maintain.
+    answer_form:
+      type: list
+      contents: [system, purpose, preference to reuse (yes/no)]
+    where_to_find: [IT systems inventory, cloud billing, architecture diagrams]
+    typical_authority: [it_infra]
+    typical_informants: [data_eng, security]
+    sufficient_answer: A list of relevant systems with a reuse preference for each, confirmed by IT.
+    default: null
+    drives: [vector database choice (reuse vs. new), hosting, integration effort]
+    related: [F6]
+
+  - id: F2
+    name: Hardware and memory
+    analysis: 3
+    one_way: true
+    question: >
+      Are GPUs available for local models? How much RAM is available for the search index,
+      compared with the raw vector size plus index overhead?
+    plain_question: >
+      If any part of the system had to run on the company's own servers, what computing
+      capacity is available (including graphics processors used for AI)?
+    plain_explanation: >
+      The computing power available if parts of the system run on company-owned or rented
+      servers rather than as outside services.
+    why_it_matters: >
+      Running AI models locally needs specialized hardware. The search index's memory needs grow
+      with the collection; if they outgrow the available memory, search slows sharply or a
+      different, slower technology is needed.
+    answer_form:
+      type: specs
+      contents: [GPUs available, RAM available for the index, storage]
+    where_to_find: [IT infrastructure inventory, cloud quotas, hosting contracts]
+    typical_authority: [it_infra]
+    typical_informants: [data_eng]
+    sufficient_answer: Available GPU, memory and storage, confirmed by IT. Only required if anything runs locally (E2).
+    default: no GPUs; cloud resources sized as needed
+    drives: [local vs. hosted models, index type, compression (quantization)]
+    source: Elastic, Milvus and FAISS documentation on index memory sizing
+    related: [E2, B1, B2]
+
+  - id: F3
+    name: Language model and context window
+    analysis: 3
+    one_way: false
+    question: Is the LLM already chosen or mandated? What is its context window and cost?
+    plain_question: >
+      Has the company already chosen, or approved, a particular AI model or provider for this
+      kind of work?
+    plain_explanation: >
+      The AI model that writes the answers, and how much text it can read at once.
+    why_it_matters: >
+      How much the model can read at once decides how much material can be handed to it per
+      question, and whether a small collection could simply be given to it whole instead of
+      searched. An approved or required model also limits other choices.
+    answer_form:
+      type: model + window
+      contents: [model or provider, context window, approved/mandated (yes/no)]
+    where_to_find: [AI policy, vendor approval list, existing AI contracts]
+    typical_authority: [it_infra, security]
+    typical_informants: [product_owner, finance]
+    sufficient_answer: The model or provider (or "not yet chosen"), whether it is mandated, and its context window.
+    default: not yet chosen
+    drives: [how many results to retrieve, whether retrieval is needed at all, generation cost]
+    related: [B1, B9, E2]
+
+  - id: F4
+    name: Operations capacity and AI skills
+    analysis: 4
+    one_way: false
+    question: Can the team operate self-hosted infrastructure and ML components, or only managed services?
+    plain_question: >
+      After launch, who will look after the system? Does the team have the skills and time to
+      run its own servers and AI components, or should everything be a managed service?
+    plain_explanation: >
+      Whether the people who will look after the system can run complex technology themselves,
+      or need it provided as a ready-made service.
+    why_it_matters: >
+      A design the team can't operate will degrade after launch. Self-hosting can be cheaper or
+      more private, but only if someone can keep it running.
+    answer_form:
+      type: single choice
+      options: [managed services only, some self-hosting, full self-hosting]
+    where_to_find: [team structure (O3), IT staffing, skills inventory, support arrangements]
+    typical_authority: [it_infra, sponsor]
+    typical_informants: [support_ops, people_ops]
+    sufficient_answer: One option, naming who will operate the system, confirmed by IT or the sponsor.
+    default: managed services only
+    drives: [managed vs. self-hosted components, monitoring design, support model]
+    source: AWS Prescriptive Guidance (choosing a RAG option by skills and policy)
+    related: [O3, D4]
+
+  - id: F5
+    name: Project stage
+    analysis: 2
+    one_way: false
+    question: Is this a prototype, a pilot, or a production system?
+    plain_question: >
+      Is this a first trial to learn what works, a pilot with real users, or the full
+      production system the company will depend on?
+    plain_explanation: >
+      How far along the project is meant to go in this phase.
+    why_it_matters: >
+      A prototype can skip much of the hardening that production needs, but a prototype that
+      quietly becomes production carries those gaps with it. Being explicit keeps the right
+      safeguards in place at each stage.
+    answer_form:
+      type: single choice
+      options: [prototype, pilot, production]
+    where_to_find: [project charter, roadmap, sponsor]
+    typical_authority: [sponsor]
+    typical_informants: [product_owner]
+    sufficient_answer: One option, with the expected date of the next stage if known.
+    default: pilot
+    drives: [build scope, which safeguards are required now vs. later]
+
+  - id: F6
+    name: Policies, approved vendors and licensing
+    analysis: 4
+    one_way: false
+    question: >
+      Is the stack open to change? Are there approved-vendor lists, open-source-only rules,
+      licensing restrictions (including on embedding and language models), or procurement lead times?
+    plain_question: >
+      Are there company rules about which software or vendors may be used, such as an approved
+      supplier list, open-source requirements, or long purchasing processes?
+    plain_explanation: >
+      Company rules that limit which technologies and suppliers may be chosen.
+    why_it_matters: >
+      A design built on a tool the company can't buy, or whose license it can't accept, has to
+      be redone. Long purchasing processes also affect the timeline.
+    answer_form:
+      type: list
+      contents: [approved vendors, prohibited vendors or licenses, open-source rules, procurement lead time]
+    where_to_find: [procurement policy, vendor approval list, legal (licensing), IT standards]
+    typical_authority: [it_infra, legal_privacy, finance]
+    typical_informants: [security]
+    sufficient_answer: The constraints that apply (or confirmation there are none), confirmed by IT, legal or procurement.
+    default: approved vendors only; standard procurement
+    drives: [allowed options for every component]
+    source: AWS Prescriptive Guidance; Azure Architecture Center (embedding model license as a gating check)
+    related: [E2, F1]
+
+  - id: F7
+    name: Expected lifespan and how likely requirements are to change
+    analysis: 5
+    one_way: false
+    question: >
+      How long is the system expected to run, and how likely are its requirements (scope, users,
+      sources, regulations) to change during that time?
+    plain_question: >
+      How long do you expect this system to be in use? How likely is it that its purpose, users
+      or the information it covers will change significantly in that time?
+    plain_explanation: >
+      How long the system is meant to last, and how much is expected to change while it does.
+    why_it_matters: >
+      A system expected to change a lot should be built from parts that can be swapped easily,
+      even at some extra cost. A short-lived or stable one can use simpler, more fixed choices.
+      This sets how much weight the design gives to being easy to change.
+    answer_form:
+      type: duration + level
+      contents: [expected lifespan, likelihood of major change (low, moderate, high)]
+    where_to_find: [roadmap, strategy documents, sponsor, department leads' plans]
+    typical_authority: [sponsor]
+    typical_informants: [product_owner, department_leads]
+    sufficient_answer: An expected lifespan and a change-likelihood level, with the main expected changes, from the sponsor.
+    default: 3 years; high likelihood of change
+    default_note: Conservative. Favors components that are easy to swap.
+    drives: [how much weight to give reversibility, modular vs. fixed components]
+
+  # ==================== GROUP G — EVALUATION & OVERSIGHT ====================
+
+  - id: G1
+    name: Test questions with known answers
+    analysis: 6
+    one_way: false
+    question: >
+      Is there (or can we create) a labeled evaluation set of real queries with their correct
+      source documents and answers, including deliberately unanswerable queries? Who can label it?
+    plain_question: >
+      To test the system, we need a set of real questions with known correct answers and the
+      documents those answers come from. Does anything like this exist (for example, past
+      help-desk tickets with resolutions)? If not, who could help write and check one?
+    plain_explanation: >
+      A collection of real questions with the right answers already worked out, used to test
+      whether the system gets them right.
+    why_it_matters: >
+      Without a test set there's no objective way to compare design options, tune the system or
+      decide whether it's ready to launch. It must include questions the documents can't answer,
+      so the system is tested on saying "not found" too.
+    answer_form:
+      type: single choice + who
+      options: [exists, can be created, not possible]
+      contents: [source of questions, people available to check answers, approximate size]
+    where_to_find: [help-desk and ticket histories, FAQs, training materials, subject-matter experts]
+    typical_authority: [product_owner, department_leads]
+    typical_informants: [support_ops, end_users, content_owners]
+    sufficient_answer: >
+      Whether a test set exists or who will create it, with the experts named to check answers,
+      and a plan to include unanswerable questions, confirmed by the product owner.
+    default: can be created by subject-matter experts
+    default_note: >
+      Questions written by copying a document's own wording make search look better than it is;
+      prefer real questions, or rephrased ones.
+    drives: [evaluation plan, tuning, comparing design options, go-live decision]
+    source: Azure Architecture Center (RAG evaluation phase)
+    related: [C9, G4]
+
+  - id: G2
+    name: What "good enough" means
+    analysis: 5
+    one_way: false
+    question: >
+      What metrics and thresholds define success, per tier? (e.g., share of relevant documents
+      found, faithfulness of answers to sources, answer accuracy, rate of catastrophic misses)
+    plain_question: >
+      How will we decide whether the system is good enough to launch? For example: "it finds the
+      right document 95% of the time" or "no more than 1 in 200 answers contains an error".
+    plain_explanation: >
+      The measurable targets the system must meet before it's trusted, possibly stricter for
+      high-stakes uses.
+    why_it_matters: >
+      Clear targets turn "is it good?" into a yes-or-no test, and stop the launch decision from
+      resting on impressions. Different stakes tiers usually need different targets.
+    answer_form:
+      type: metric + threshold per tier
+    where_to_find: [quality targets, service-level agreements, error tolerance (A8), current process performance]
+    typical_authority: [sponsor, department_leads, product_owner]
+    typical_informants: [compliance, end_users]
+    sufficient_answer: At least one metric with a threshold per tier, agreed by the sponsor and the departments whose work is affected.
+    default: derived from A8 (error tolerance) per tier
+    drives: [test targets, gate thresholds, go-live criteria]
+    related: [A8, G1]
+
+  - id: G3
+    name: Ongoing feedback
+    analysis: 3
+    one_way: false
+    question: Will there be an ongoing feedback signal after launch? (user ratings, corrections, expert review, none)
+    plain_question: >
+      After launch, will users be able to flag good and bad answers, and will anyone review those
+      flags?
+    plain_explanation: >
+      How the system will learn about its mistakes once people are using it.
+    why_it_matters: >
+      A system that never hears about its errors can't be improved, and problems go unnoticed.
+      Feedback is also how changes in the documents or in what people ask get spotted.
+    answer_form:
+      type: multi-select
+      options: [user ratings, user corrections, expert review, none]
+    where_to_find: [product requirements, support processes]
+    typical_authority: [product_owner]
+    typical_informants: [support_ops, end_users]
+    sufficient_answer: The feedback methods planned and who reviews them.
+    default: user ratings with periodic expert review
+    drives: [monitoring, improvement process, routing reports of missing information to data owners]
+
+  - id: G4
+    name: Expert review capacity
+    analysis: 4
+    one_way: false
+    question: >
+      How many hours per week of subject-matter expert and data-owner time are available for
+      labeling, sign-offs and audits of answers that passed all checks?
+    plain_question: >
+      Roughly how many hours a week could your specialists spend checking the system's answers,
+      helping build test questions, or confirming important facts?
+    plain_explanation: >
+      How much time the company's experts can realistically give to checking and improving the
+      system.
+    why_it_matters: >
+      Several safeguards rely on people: confirming key facts, reviewing a random sample of answers
+      that passed every automatic check, and building test questions. If no time is available,
+      those safeguards exist only on paper, and the design must rely more on automatic checks.
+    answer_form:
+      type: hours per week per department
+    where_to_find: [department leads, workload plans]
+    typical_authority: [department_leads]
+    typical_informants: [people_ops, product_owner]
+    sufficient_answer: Committed hours per week from each department lead whose experts are involved.
+    default: 2 hours per week per department
+    drives: [sign-off workload, sampled audits of passed answers, test-set size, how much to automate]
+    related: [A6, G1, O1]
+
+  - id: G5
+    name: Tracing and monitoring
+    analysis: 4
+    one_way: false
+    question: >
+      What tracing of retrieval and reasoning steps is required (scores, sources used, filters
+      applied, decisions made), and for how long?
+    plain_question: >
+      When something goes wrong, will the team need to see exactly how the system reached its
+      answer: what it searched, what it found and why it chose it?
+    plain_explanation: >
+      A behind-the-scenes record of each step the system took to produce an answer, used for
+      troubleshooting and audits.
+    why_it_matters: >
+      Without step-by-step records, mistakes can't be diagnosed and the same errors repeat.
+      These records must still respect any limits on what may be logged.
+    answer_form:
+      type: level + retention
+      options: [none, summary per answer, full step-by-step trace]
+    where_to_find: [IT operations standards, audit requirements (A4), logging limits (E6)]
+    typical_authority: [it_infra, compliance]
+    typical_informants: [support_ops, security]
+    sufficient_answer: A tracing level and retention period, reconciled with E6 and confirmed by IT and compliance.
+    default: full step-by-step trace, with personal data redacted
+    drives: [trace design, debugging, audit support, anomaly detection]
+    source: Azure Architecture Center (agentic RAG); OWASP LLM08
+    conflicts_with: [E6]
+    related: [A4]
