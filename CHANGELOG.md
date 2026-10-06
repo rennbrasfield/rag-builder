@@ -5,6 +5,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versio
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html), adapted for documents — see
 *Organizational Rules §2*. Each document is versioned independently; a release may cover several.
 
+## 2026-10-06 — Authority rules and Role Map
+
+### RAG Variable Catalog → v1.1.0
+- **Added** authority rules: any one listed authority confirms a fact within its scope; every affected authority approves a design choice.
+- **Added** fallback rules: informant fallbacks may go sideways; authority passes only by delegation or upward.
+- **Added** optional fields `fallback_overrides` and `authority_rule`; overrides on 16 variables (O1, A8, A10, B1, B2, B21, B22, C7, C9, D4, E2, E3, E5, E7, F3, G5).
+
+### Role Map → v1.0.0 (new, `custom-design/`)
+- **Added** the 13 roles: plain description, example titles, who holds the role in small companies, approval lens, informant fallbacks, authority fallback (delegation/upward), and the variables each typically confirms or informs (derived from catalog v1.1.0).
+
+### Repository
+- **Changed** README "Knowledge base contents" to list both documents.
+
 ## 2026-10-05 — Variable Catalog v1.0.0
 
 ### RAG Variable Catalog → v1.0.0 (new, `custom-design/`)

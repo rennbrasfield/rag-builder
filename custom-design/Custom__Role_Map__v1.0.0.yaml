@@ -1,0 +1,247 @@
+# ============================================================
+# DOCUMENT METADATA (PROTECTED — do not alter without express user permission)
+# ============================================================
+metadata:
+  title: "Custom | Role Map | v1.0.0"
+  type: Custom
+  category: Role Map
+  variant: null
+  version: v1.0.0
+  version_note: Initial role map
+  derived_from: "Custom | RAG Variable Catalog | v1.1.0"
+
+# ------------------------------------------------------------
+# PURPOSE
+# Defines the roles used in the Variable Catalog's typical_authority and typical_informants
+# fields: who each role is in plain terms, which variables it typically confirms or informs,
+# what it approves at the design-approval stage, and whom to try instead if it's unavailable.
+#
+# RULES
+# - Roles describe KINDS of knowledge and authority, not job titles. Titles differ by company.
+# - Roles are typical, not fixed. In a build, any person can be an informant, an authority,
+#   or both, for any variable. Each build records its actual assignments (contacts.yaml and
+#   answers.yaml), per variable and per department or document set.
+# - One person can hold several roles (common in small companies); one role can be held by
+#   several people (e.g., one department lead per department).
+# - For a value scoped to one department or document set, the authority must come from that
+#   department.
+# - typical_authority_for / typical_informant_for are DERIVED from the Variable Catalog version
+#   named in metadata.derived_from. When the catalog is revised, these lists must be
+#   regenerated, and a Role Map revision proposed (dependency flag).
+# - Fallbacks: informant fallbacks may go sideways to anyone who knows the facts. Authority passes
+#   only by explicit delegation or upward, never sideways. A variable may override a role's
+#   default fallbacks (catalog field fallback_overrides); the override wins for that variable.
+# - Confirming a fact needs ANY ONE listed authority within its scope; approving a design choice
+#   needs EVERY affected authority (catalog AUTHORITY AND FALLBACK RULES).
+#
+# FIELD GUIDE
+#   id                     Role ID used in the catalog
+#   name                   Short name
+#   who_this_is            Plain-language description
+#   example_titles         Common titles for this role (examples only)
+#   in_small_companies     Who usually holds this role when there is no dedicated person
+#   approval_lens          What this role approves at the design-approval stage (design choices, not technical ones)
+#   informant_fallbacks    Roles to ask instead, in order, when this role can't provide facts (SIDEWAYS allowed)
+#   authority_fallback     When this role can't confirm or approve: delegation (the authority names a deputy,
+#                          recorded with date) and/or the roles ABOVE it, in order. Never sideways.
+#   typical_authority_for  Variables this role typically confirms (answer becomes Sufficient)
+#   typical_informant_for  Variables this role is typically asked about first for facts
+#   note                   Optional
+# ------------------------------------------------------------
+
+roles:
+
+  - id: sponsor
+    name: Sponsor
+    who_this_is: >
+      The executive who pays for the project and is accountable for its outcome. Settles
+      disputes between departments when a resolution meeting fails (O4).
+    example_titles: [CEO, COO, VP of Operations, department executive funding the project]
+    in_small_companies: A founder or co-founder.
+    approval_lens: >
+      Overall fit with company goals and budget; trade-offs between departments; accepting
+      risk on the company's behalf.
+    informant_fallbacks: [product_owner]
+    authority_fallback: {delegation: allowed, upward: []}
+    fallback_note: "Top of the chain: if the sponsor is unavailable, only a deputy the sponsor names (or whoever appointed the sponsor) can act."
+    typical_authority_for: [O1, O2, O3, O4, O5, A1, A2, A3, A5, A7, A8, D2, D3, D4, D6, F4, F5, F7, G2]
+    typical_informant_for: []
+    note: >
+      Heaviest authority load after the product owner. To avoid a bottleneck, batch the
+      sponsor's confirmations into one packet and delegate where the sponsor agrees.
+
+  - id: product_owner
+    name: Product owner
+    who_this_is: >
+      The person who decides what the system must do and for whom, and who represents the
+      users' needs throughout the project.
+    example_titles: [product manager, project lead, business owner of the tool]
+    in_small_companies: Often the person leading the AI project, or the sponsor.
+    approval_lens: >
+      Whether design choices meet the users' needs: what the system does, how answers look,
+      how fast they arrive, and how it behaves when unsure.
+    informant_fallbacks: [department_leads, end_users]
+    authority_fallback: {delegation: allowed, upward: [sponsor]}
+    typical_authority_for: [A1, A5, A6, A9, A10, A11, A12, B10, B14, I5, C1, C2, C3, C4, C5, C6, C7, C8, C9, D1, D5, E4, E9, G1, G2, G3]
+    typical_informant_for: [O1, O2, O4, O5, A4, A7, A8, D2, D3, D6, F3, F5, F7, G4]
+    note: >
+      The largest authority load (26 variables). If the product owner is also the builder,
+      another authority should confirm the high-stakes ones, so no one approves their own assumptions.
+
+  - id: department_leads
+    name: Department leads
+    who_this_is: >
+      The heads of the departments whose work or documents the system affects. Each one speaks
+      for their own department's needs and risks.
+    example_titles: [head of legal, finance director, sales manager, HR lead, operations manager]
+    in_small_companies: Team leads, or the founders who oversee each area.
+    approval_lens: >
+      Whether design choices fit what actually happens in their department: the real stakes of
+      a miss or a wrong answer, which sources are authoritative, how fresh information must be,
+      and what counts as "good enough" for their work.
+    informant_fallbacks: [content_owners, end_users]
+    authority_fallback: {delegation: allowed, upward: [sponsor]}
+    typical_authority_for: [O5, A2, A3, A6, A7, A8, A9, B11, B15, B17, B20, B21, C3, D5, G1, G2, G4]
+    typical_informant_for: [O1, O2, O3, B1, B2, B7, B9, B16, B22, I1, I5, C1, C7, D1, E1, E3, E7, F7]
+    note: Per-department values (e.g., A2 for Legal's contracts) must be confirmed by that department's lead.
+
+  - id: content_owners
+    name: Content owners
+    who_this_is: >
+      The people responsible for keeping a collection of documents accurate and organized.
+      They know what's in it, how it's structured and how it changes.
+    example_titles: [knowledge manager, records manager, document controller, team member who maintains the shared drive]
+    in_small_companies: Whoever created or maintains the documents in each area.
+    approval_lens: >
+      Whether choices about their documents are right: how they're split, labeled and
+      versioned, and which ones are authoritative.
+    informant_fallbacks: [end_users, it_infra]
+    authority_fallback: {delegation: allowed, upward: [department_leads]}
+    typical_authority_for: [B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, B13, B15, B16, B17, B18, B20]
+    typical_informant_for: [A2, A3, A8, A9, B19, B21, I1, I3, I4, C6, C9, D5, E1, E3, E5, E8, G1]
+
+  - id: end_users
+    name: End users
+    who_this_is: The people who will actually ask the system questions.
+    example_titles: [staff in the affected departments, customers (if external)]
+    in_small_companies: Everyone who will use the tool.
+    approval_lens: >
+      Not an approving role. Their input shapes the design, and their feedback after launch
+      shows whether it works.
+    informant_fallbacks: [support_ops, product_owner]
+    authority_fallback: {delegation: not_applicable, upward: []}
+    fallback_note: "Not an authority role."
+    typical_authority_for: []
+    typical_informant_for: [A1, A2, A3, A4, A5, A6, A7, A9, A11, A12, B4, B5, B6, B9, B10, B11, B13, B14, B15, B17, B18, B20, I5, C1, C2, C3, C4, C5, C6, C8, C9, D1, D5, G1, G2, G3]
+    note: Informant only by design. Their answers stay Partial until an authority confirms them.
+
+  - id: people_ops
+    name: People operations
+    who_this_is: >
+      Whoever holds the official record of who works where: departments, headcount, reporting
+      lines. The authority for the org map (O1).
+    example_titles: [HR manager, people operations lead, HR business partner]
+    in_small_companies: Often the operations manager or a founder.
+    approval_lens: Whether the org map, and the approval routing built on it, matches the real organization.
+    informant_fallbacks: [department_leads]
+    authority_fallback: {delegation: allowed, upward: [sponsor]}
+    typical_authority_for: [O1]
+    typical_informant_for: [O3, C7, F4, G4]
+    note: O1 contains personal data (names, reporting lines). Build workspace only.
+
+  - id: it_infra
+    name: IT infrastructure
+    who_this_is: >
+      Whoever runs the company's systems: cloud accounts, servers, networks, and the tools
+      already in use.
+    example_titles: [IT manager, head of infrastructure, CTO, systems administrator]
+    in_small_companies: An IT contractor, or the most technical founder.
+    approval_lens: >
+      Whether design choices fit the existing technology, can be hosted and supported, and
+      meet uptime needs.
+    informant_fallbacks: [data_eng, support_ops]
+    authority_fallback: {delegation: allowed, upward: [sponsor]}
+    typical_authority_for: [B1, B2, B22, I1, I2, I3, I4, C7, D6, F1, F2, F3, F4, F6, G5]
+    typical_informant_for: [O2, O3, A10, A11, B3, B4, B5, B8, B12, B20, B21, D4, E2, E3, E4, E5, E6, E8, E9, E10]
+
+  - id: data_eng
+    name: Data engineering
+    who_this_is: >
+      Whoever manages databases, data pipelines and integrations between systems.
+    example_titles: [data engineer, integration developer, BI or analytics engineer]
+    in_small_companies: Often the same person as IT infrastructure, or an outside developer.
+    approval_lens: >
+      Whether choices about labels, data flows and connections to other systems are workable
+      and reliable.
+    informant_fallbacks: [it_infra]
+    authority_fallback: {delegation: allowed, upward: [it_infra]}
+    typical_authority_for: [B12, B16, B22, I4, I5, C5]
+    typical_informant_for: [B1, B2, B3, I1, I2, I3, F1, F2]
+
+  - id: security
+    name: Security
+    who_this_is: >
+      Whoever sets the rules for protecting information: access control, data classification,
+      approved services and network safeguards.
+    example_titles: [CISO, security officer, IT security manager]
+    in_small_companies: Usually IT infrastructure, sometimes with an outside advisor.
+    approval_lens: >
+      Whether design choices keep information protected: who can see what, where data goes,
+      untrusted content, abuse limits and actions the system may take.
+    informant_fallbacks: [it_infra]
+    authority_fallback: {delegation: allowed, upward: [sponsor]}
+    typical_authority_for: [A10, I2, I3, E1, E2, E3, E4, E6, E8, E9, E10, F3]
+    typical_informant_for: [E7, F1, F6, G5]
+
+  - id: legal_privacy
+    name: Legal and privacy
+    who_this_is: >
+      Legal counsel and whoever is responsible for personal-data protection.
+    example_titles: [general counsel, data protection officer (DPO), privacy officer, outside counsel]
+    in_small_companies: Outside counsel, consulted as needed.
+    approval_lens: >
+      Whether design choices are lawful: personal data, retention and deletion, licensing,
+      copyright and regulations.
+    informant_fallbacks: [compliance]
+    authority_fallback: {delegation: allowed, upward: [sponsor]}
+    typical_authority_for: [A2, A3, A4, B14, B19, E1, E2, E5, E6, E7, F6]
+    typical_informant_for: [E4]
+
+  - id: compliance
+    name: Compliance
+    who_this_is: >
+      Whoever is responsible for meeting regulatory and audit obligations.
+    example_titles: [compliance officer, risk manager, internal audit lead]
+    in_small_companies: Often the same person as legal, or the operations manager.
+    approval_lens: >
+      Whether design choices satisfy audit and regulatory requirements: records, citations,
+      human review, error tolerances.
+    informant_fallbacks: [legal_privacy]
+    authority_fallback: {delegation: allowed, upward: [sponsor]}
+    typical_authority_for: [A2, A3, A4, A6, A8, E5, E7, G5]
+    typical_informant_for: [B14, B15, E1, E2, E6, G2]
+
+  - id: finance
+    name: Finance
+    who_this_is: Whoever approves budgets and spending.
+    example_titles: [CFO, finance director, controller]
+    in_small_companies: A founder or the operations manager.
+    approval_lens: Whether design choices fit the approved setup, per-question and monthly budgets.
+    informant_fallbacks: [product_owner]
+    authority_fallback: {delegation: allowed, upward: [sponsor]}
+    typical_authority_for: [D2, D3, D4, F6]
+    typical_informant_for: [F3]
+
+  - id: support_ops
+    name: Support and operations
+    who_this_is: >
+      Whoever will support users and keep the system running day to day after launch.
+    example_titles: [help-desk lead, IT support, operations team, AI operations]
+    in_small_companies: Often the builder, or IT infrastructure.
+    approval_lens: >
+      Whether the design can realistically be supported: monitoring, troubleshooting,
+      feedback handling.
+    informant_fallbacks: [it_infra, end_users]
+    authority_fallback: {delegation: allowed, upward: [it_infra]}
+    typical_authority_for: [C9]
+    typical_informant_for: [C2, C3, F4, G1, G3, G5]

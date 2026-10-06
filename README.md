@@ -27,7 +27,8 @@ systems, operated with an AI assistant (Claude Code) under strict human approval
 ## Knowledge base contents
 | Document | What it is |
 |---|---|
-| `custom-design/Custom__RAG_Variable_Catalog__v1.0.0.yaml` | 81 variables that must be answered before a RAG architecture is chosen, with plain-language questions, where to find answers, who can confirm them, defaults, analysis depth and hard-to-undo flags. The Build commands run on it. |
+| `custom-design/Custom__RAG_Variable_Catalog__v1.1.0.yaml` | 81 variables that must be answered before a RAG architecture is chosen, with plain-language questions, where to find answers, who can confirm them, defaults, analysis depth and hard-to-undo flags, plus authority and fallback rules. The Build commands run on it. |
+| `custom-design/Custom__Role_Map__v1.0.0.yaml` | The 13 roles behind the catalog: who each is, what they approve, which variables they confirm or inform, and who to go to when they're unavailable. |
 
 ## Setup
 After cloning, turn on the commit guard once:
