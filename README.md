@@ -17,7 +17,9 @@ systems, operated with an AI assistant (Claude Code) under strict human approval
 |---|---|
 | `governance/` | The active versions of the three governance documents |
 | `custom-design/` | My own designs, including `.yaml` data documents (e.g., the Variable Catalog) |
-| `tools/` | Small scripts (quote checker, report generator) |
+| `tools/` | Small scripts (the quote checker) |
+| `tests/` | Automated tests for the tools |
+| `requirements.txt` | Python packages the tools need |
 | `templates/` | The empty build-workspace skeleton copied by `New Build` |
 | `.githooks/` | Git hooks that block build data from being committed |
 | `archive/` | Every superseded version, kept for history and rollback |
@@ -31,10 +33,20 @@ systems, operated with an AI assistant (Claude Code) under strict human approval
 | `custom-design/Custom__Role_Map__v1.0.0.yaml` | The 13 roles behind the catalog: who each is, what they approve, which variables they confirm or inform, and who to go to when they're unavailable. |
 
 ## Setup
-After cloning, turn on the commit guard once:
+After cloning, run these once from the project folder:
 ```
 git config core.hooksPath .githooks
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
 ```
+The first line turns on the commit guard. The other two create a private Python environment
+(`.venv/`, never committed) for the tools.
+
+## Tools
+| Command | What it does |
+|---|---|
+| `.venv/bin/python tools/quote_check.py <build-folder>` | Checks every evidence quote in a build appears word for word in its source document or logged reply, and that no source changed after intake. Read-only. |
+| `.venv/bin/python -m unittest discover -s tests -v` | Runs the automated tests for the tools. |
 
 ## Build workflow
 This repository is the **tool**. Each company engagement is a **build**, which holds that

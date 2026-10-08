@@ -5,6 +5,15 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versio
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html), adapted for documents — see
 *Organizational Rules §2*. Each document is versioned independently; a release may cover several.
 
+## 2026-10-08 — Phase 1 tools
+
+### Repository
+- **Added** `templates/build-workspace/`: the skeleton `New Build` copies (build `CLAUDE.md`, `build.yaml`, `contacts.yaml`, `evidence.yaml`, `answers.yaml`, and the `inputs/`, `correspondence/`, `reports/`, `decisions/` folders).
+- **Added** `tools/quote_check.py`: read-only check that every evidence quote appears word for word in its source (text, Markdown, HTML, Word, PDF, logged replies), that sources haven't changed since intake, and that cited variable IDs exist. Scanned PDFs are flagged for manual checking.
+- **Added** `tests/test_quote_check.py`: 14 automated tests (must-pass, must-fail and manual-check cases).
+- **Added** `requirements.txt` (PyYAML 6.0.3, pypdf 6.19.0); `.venv/` ignored by git.
+- **Changed** README: setup steps for the Python environment, and a Tools section.
+
 ## 2026-10-06 — Authority rules and Role Map
 
 ### RAG Variable Catalog → v1.1.0

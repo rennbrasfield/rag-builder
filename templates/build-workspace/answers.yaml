@@ -1,0 +1,25 @@
+# Answers — one entry per variable, and per scope where a value differs by department or document set.
+# New Build fills one "Missing" entry per variable from the Variable Catalog version in build.yaml.
+# Every change is shown to the user and approved before it is written.
+
+answers: []
+#  - variable: A2
+#    scope: company                 # company · department:<name> · document_set:<name>
+#    value: <the answer>
+#    status: Missing                # Missing · Documented · Asked · Partial · Sufficient · Conflicting · Assumed · Confirmed
+#    confidence: null               # measured · estimated · guessed
+#    evidence: []                   # evidence IDs (EV-xxxx)
+#    assigned_authority: []         # contact IDs who can confirm this (from Role Map + build assignments)
+#    informants: []                 # contact IDs asked for facts
+#    confirmed_by: null             # contact ID of the authority who confirmed (any one, within scope)
+#    asked: []                      # - {person: P-004, date: <date>, email: correspondence/drafts/<file>}
+#    assumed:                       # only when status is Assumed
+#      proposed_by: null            # system · user
+#      accepted: null               # true once the user accepts a system-proposed assumption
+#      reason: null
+#    overrides:                     # build-level changes to catalog reference points, with reasons
+#      analysis: null               # {level: 8, reason: "..."}
+#      one_way: null                # {value: true, reason: "..."}
+#      default: null                # {value: "...", reason: "..."}
+#    approval_mode: null            # required (one-way or high-stakes) · notify (objection window)
+#    history: []                    # - {date, change, by}

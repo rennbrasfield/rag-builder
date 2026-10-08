@@ -1,0 +1,24 @@
+# Evidence ledger (Organizational Rules §8 rule 5; protected node §3 item 6).
+# Quotes are VERBATIM and never altered. A wrong or outdated entry is superseded by a new one.
+# Every quote is checked word for word against its source by the tool's quote checker.
+
+evidence: []
+#  - id: EV-0001
+#    source:
+#      type: document            # document · person
+#      file: inputs/<name>       # documents only
+#      sha256: <hash>            # documents only — must match build.yaml inputs
+#      location: <page, section or heading>
+#      person: P-003             # persons only (contacts.yaml ID; "me" = the user)
+#      role: <role they answered in>
+#      date: <date of statement>
+#      channel: <email, meeting, chat>
+#      response_file: correspondence/responses/<file>   # persons only, if logged from a reply
+#    quote: "<exact words, unchanged>"
+#    supports: [B1, B12]          # variable IDs
+#    scope: company               # company · department:<name> · document_set:<name>
+#    interpretation: <how the quote answers the variable — the only non-verbatim field>
+#    recorded: <date>
+#    quote_check: {passed: null, checked: null}
+#    status: active               # active · superseded
+#    superseded_by: null

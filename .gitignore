@@ -37,3 +37,8 @@ decisions/signoff-*
 # The empty build-workspace skeleton is part of the tool.
 !templates/build-workspace/
 !templates/build-workspace/**
+
+# Python virtual environment (local only)
+.venv/
+__pycache__/
+*.pyc

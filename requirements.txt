@@ -1,0 +1,4 @@
+# Python dependencies for tools/ — install with:
+#   python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+pyyaml==6.0.3
+pypdf==6.19.0

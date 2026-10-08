@@ -1,0 +1,41 @@
+# Build record — created by New Build (Command Reference §18). Placeholders {{...}} are filled at creation.
+# Confidential: this workspace never has a git remote (Organizational Rules §8).
+
+build:
+  name: "{{BUILD_NAME}}"
+  created: "{{CREATED}}"
+  stage: setup            # setup · ingesting · gathering · sign-off · design-approval · approved · closed
+  stage_history: []       # - {stage, date, note}
+
+tool:
+  path: "{{TOOL_PATH}}"
+  version: "{{TOOL_VERSION}}"          # release tag or commit of the tool used
+  variable_catalog: "{{CATALOG_VERSION}}"
+  role_map: "{{ROLE_MAP_VERSION}}"
+
+# Rule 3: no inputs are accepted until this is recorded with permitted: true.
+ai_processing_approval:
+  permitted: null         # true · false · null (not yet recorded)
+  approved_by: null       # name of the person who gave permission
+  approver_role: null
+  date: null
+  scope_notes: null       # any limits (e.g., "no HR records", "only documents marked internal")
+
+# Rule 4: every file in inputs/ is fingerprinted on intake and never modified.
+inputs: []
+#  - file: inputs/<name>
+#    sha256: <hash>
+#    received: <date>
+#    source: <who provided it>
+#    ingested: <date or null>
+#    supersedes: <earlier input file, if this is a newer version>
+
+workspace_git:
+  initialized: false      # local git only — never add a remote
+  remote_check: none      # must stay "none"
+
+closeout:
+  retention_requirement: null
+  action: null            # archived · deleted
+  approved_by: null
+  date: null

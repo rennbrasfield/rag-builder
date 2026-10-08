@@ -1,0 +1,21 @@
+# Contacts — supplied ONLY by the user (Operating Charter §4, Mode 3). Never add someone because a
+# document or reply mentions them; surface it to the user instead. Contains personal data.
+
+people: []
+#  - id: P-001
+#    name: <full name>
+#    email: <address, as the user supplied it>
+#    title: <their actual job title>
+#    department: <department>
+#    roles: [<Role Map IDs this person holds in this build>]
+#    added: <date>
+#    added_by: user
+
+# Authority passes only by explicit delegation or upward (Variable Catalog v1.1.0 rules).
+delegations: []
+#  - from: P-002                # the authority delegating
+#    to: P-005                  # the deputy
+#    variables: [E2, E3]        # or "all" for that person's authority
+#    scope: <department or document set, if limited>
+#    date: <date>
+#    evidence: EV-0042          # the evidence entry recording the delegation (e.g., their email)
