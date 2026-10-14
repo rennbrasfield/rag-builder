@@ -5,6 +5,15 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versio
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html), adapted for documents — see
 *Organizational Rules §2*. Each document is versioned independently; a release may cover several.
 
+## 2026-10-14 — Catalog formatting fix
+
+### RAG Variable Catalog → v1.1.1 (PATCH, no meaning change)
+- **Fixed** 18 lines (17 variables) where YAML misread the text: list items containing commas were split in two (e.g., "structured data (e.g., JSON)"), and yes/no values became true/false. Affected: O1, A5, A6, A11, A12, B1, B14, B19, I1, I3, C4, C5, D1, E4, E6, E8, F7.
+
+### Repository
+- **Added** `tests/test_catalog.py`: 10 integrity checks on the active catalog and Role Map (formatting, required fields, ranges, cross-references, roles, derived lists). Confirmed to fail on v1.1.0.
+- **Changed** README to the new catalog filename and test description.
+
 ## 2026-10-08 — Phase 1 tools
 
 ### Repository

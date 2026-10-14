@@ -29,7 +29,7 @@ systems, operated with an AI assistant (Claude Code) under strict human approval
 ## Knowledge base contents
 | Document | What it is |
 |---|---|
-| `custom-design/Custom__RAG_Variable_Catalog__v1.1.0.yaml` | 81 variables that must be answered before a RAG architecture is chosen, with plain-language questions, where to find answers, who can confirm them, defaults, analysis depth and hard-to-undo flags, plus authority and fallback rules. The Build commands run on it. |
+| `custom-design/Custom__RAG_Variable_Catalog__v1.1.1.yaml` | 81 variables that must be answered before a RAG architecture is chosen, with plain-language questions, where to find answers, who can confirm them, defaults, analysis depth and hard-to-undo flags, plus authority and fallback rules. The Build commands run on it. |
 | `custom-design/Custom__Role_Map__v1.0.0.yaml` | The 13 roles behind the catalog: who each is, what they approve, which variables they confirm or inform, and who to go to when they're unavailable. |
 
 ## Setup
@@ -46,7 +46,7 @@ The first line turns on the commit guard. The other two create a private Python 
 | Command | What it does |
 |---|---|
 | `.venv/bin/python tools/quote_check.py <build-folder>` | Checks every evidence quote in a build appears word for word in its source document or logged reply, and that no source changed after intake. Read-only. |
-| `.venv/bin/python -m unittest discover -s tests -v` | Runs the automated tests for the tools. |
+| `.venv/bin/python -m unittest discover -s tests -v` | Runs the automated tests: the quote checker, and integrity checks on the catalog and Role Map. |
 
 ## Build workflow
 This repository is the **tool**. Each company engagement is a **build**, which holds that
