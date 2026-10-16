@@ -1,19 +1,32 @@
 #!/bin/sh
-# RAG Builder commit guard (Organizational Rules §8).
-# Blocks commits containing build data. Build workspaces live outside this repo.
-# The empty skeleton in templates/build-workspace/ is exempt.
+# RAG Builder commit guard.
+#  1. Build data (Organizational Rules §8): build workspaces live outside this repo.
+#     The empty skeleton in templates/build-workspace/ is exempt.
+#  2. Decision logic (Organizational Rules §9): the engine — weights, thresholds, trade-off
+#     resolution, option catalog and selection rules — lives only in the private engine repo.
 
-pattern='(^|/)inputs/|(^|/)correspondence/|(^|/)build\.yaml$|(^|/)evidence\.yaml$|(^|/)answers\.yaml$|(^|/)contacts\.yaml$|signoff-packet-v[0-9]|(^|/)decisions/signoff-'
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+status=0
 
-matches=$(git diff --cached --name-only --diff-filter=ACMR \
-  | grep -Ev '^templates/build-workspace/' \
-  | grep -E "$pattern")
-
-if [ -n "$matches" ]; then
+build_pattern='(^|/)inputs/|(^|/)correspondence/|(^|/)build\.yaml$|(^|/)evidence\.yaml$|(^|/)answers\.yaml$|(^|/)contacts\.yaml$|signoff-packet-v[0-9]|(^|/)decisions/signoff-'
+build_matches=$(printf '%s\n' "$staged" | grep -Ev '^templates/build-workspace/' | grep -E "$build_pattern")
+if [ -n "$build_matches" ]; then
   echo "BLOCKED: these staged files look like build data (Organizational Rules §8):" >&2
-  echo "$matches" | sed 's/^/  - /' >&2
+  echo "$build_matches" | sed 's/^/  - /' >&2
   echo "Build data belongs in ~/Documents/rag-builds/<build>/, never in this repo." >&2
-  echo "Unstage them with: git restore --staged <file>" >&2
-  exit 1
+  status=1
 fi
-exit 0
+
+engine_pattern='(^|/)engine/|Custom__RAG_Option_Catalog__|Custom__Decision_Rules__|Custom__Selection_Rules__|Custom__Decision_Weights__'
+engine_matches=$(printf '%s\n' "$staged" | grep -E "$engine_pattern")
+if [ -n "$engine_matches" ]; then
+  echo "BLOCKED: these staged files look like decision-engine material (Organizational Rules §9):" >&2
+  echo "$engine_matches" | sed 's/^/  - /' >&2
+  echo "Decision logic belongs only in the private rag-builder-engine repo, never in this public repo." >&2
+  status=1
+fi
+
+if [ "$status" -ne 0 ]; then
+  echo "Unstage them with: git restore --staged <file>" >&2
+fi
+exit $status

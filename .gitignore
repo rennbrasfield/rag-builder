@@ -42,3 +42,6 @@ decisions/signoff-*
 .venv/
 __pycache__/
 *.pyc
+
+# Decision engine (Organizational Rules §9) — lives only in the private rag-builder-engine repo.
+engine/

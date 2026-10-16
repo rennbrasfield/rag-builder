@@ -5,6 +5,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versio
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html), adapted for documents — see
 *Organizational Rules §2*. Each document is versioned independently; a release may cover several.
 
+## 2026-10-15 — Public/private boundary
+
+### Organizational Rules → v1.3.0
+- **Added** §9 Public/Private Boundary: three layers (what to consider / what each touches / how to decide), four places (public tool repo, private engine repo, build workspaces, built systems), rules for publishing a built system, enforcement layers.
+- **Added** guardrail triggers 8 (decision-engine material entering public material) and 9 (publishing a built system) (§6).
+- **Changed** §5 folder ontology to point to §9.
+
+### Repository
+- **Changed** `.githooks/pre-commit` to also block `engine/` folders and engine-document filenames; `.gitignore` ignores `engine/`.
+- **Added** README section "What's public, and why", with an all-rights-reserved notice.
+- **Changed** `CLAUDE.md`: decision logic never enters this repo.
+- **Added** the private `rag-builder-engine` repository (not public), with a push guard that refuses non-private destinations.
+
 ## 2026-10-14 — Catalog formatting fix
 
 ### RAG Variable Catalog → v1.1.1 (PATCH, no meaning change)

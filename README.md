@@ -26,6 +26,20 @@ systems, operated with an AI assistant (Claude Code) under strict human approval
 | `CHANGELOG.md` | What changed in each release |
 | `CLAUDE.md` | Operating instructions loaded by Claude Code at session start |
 
+## What's public, and why
+This repository shows how I reason about RAG design: the governance process, the 81 variables that
+must be answered before an architecture is chosen, who confirms them, and the tools that keep every
+answer tied to evidence.
+
+The **decision engine**, which weighs those answers against each other and turns them into a
+recommended build, is kept in a separate private repository by design. The variables show what
+matters. How to decide between them is the part I keep private.
+
+Company data is never published. Each company's build lives in a private workspace outside any
+repository.
+
+© 2026 Davis Rennos Brasfield. All rights reserved. Shared for viewing; not licensed for reuse.
+
 ## Knowledge base contents
 | Document | What it is |
 |---|---|
